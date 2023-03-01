@@ -1,0 +1,3 @@
+[build]
+  publish = "target"
+  command = "mvn clean install"

@@ -1,0 +1,52 @@
+version: '3'
+services:
+  nginx:
+    restart: always
+    image: nginx:latest
+    container_name: DockerNginx
+    volumes:
+      - ./:/etc/nginx/conf.d
+    ports:
+      - 1935:1935
+      - 443:443
+    links:
+      - spring-boot-1
+      - spring-boot-2
+    depends_on:
+      - spring-boot-1
+      - spring-boot-2
+  mysql:
+    image: mysql:5.7
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_ROOT_PASSWORD: 123abc@A
+      MYSQL_DATABASE: booking_meeting
+      MYSQL_USER: dev
+      MYSQL_PASSWORD: 123abc@A
+  redis:
+    image: redis
+    container_name: my_redis
+    command: redis-server --requirepass 123abc@A
+    ports:
+      - "6379:6379"
+  spring-boot-1:
+    image: meeting-booking:1.0
+    expose:
+      - "10101"
+    restart: always
+    depends_on:
+      - mysql
+      - redis
+  spring-boot-2:
+    image: meeting-booking:1.0
+    expose:
+      - "10101"
+    restart: always
+    depends_on:
+      - mysql
+      - redis
+volumes:
+  db_data:
