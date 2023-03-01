@@ -1,1 +1,1 @@
-web: java -jar meeting-booking-1.0.jar
+web: java RSAKeyProperties
