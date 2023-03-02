@@ -30,4 +30,6 @@ public class ServiceResponse implements Serializable {
 
     private String modifiedDate;
 
+    private String image;
+
 }
