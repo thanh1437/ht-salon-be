@@ -42,6 +42,7 @@ public class ServiceService {
             service.setCreateBy(userDetails.getName());
             service.setCode(generateNewServiceCode());
         }
+        service.setImage(serviceRequest.getImage());
         service.setName(serviceRequest.getName());
         service.setType(serviceRequest.getType());
         service.setPrice(serviceRequest.getPrice());

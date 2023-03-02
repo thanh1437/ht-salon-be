@@ -1,5 +1,6 @@
 package com.salon.ht.entity.payload;
 
+import com.salon.ht.validation.annotation.NullOrNotBlank;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -11,7 +12,7 @@ public class ServiceRequest {
     private Long id;
 
     @ApiModelProperty(value = "Tên dịch vụ", dataType = "String", required = true)
-    @NotNull(message = "Hãy chọn tên dịch vụ")
+    @NullOrNotBlank(message = "Hãy chọn tên dịch vụ")
     private String name;
 
     @ApiModelProperty(value = "Loại dịch vụ", dataType = "Integer", required = true)
@@ -29,5 +30,9 @@ public class ServiceRequest {
     @ApiModelProperty(value = "Trạng thái dịch vụ", dataType = "Long", required = true)
     @NotNull(message = "Hãy chọn trạng thái dịch vụ")
     private Integer status;
+
+    @ApiModelProperty(value = "Ảnh dịch vụ", dataType = "String", required = true)
+    @NullOrNotBlank(message = "Hãy chọn ảnh dịch vụ")
+    private String image;
 
 }

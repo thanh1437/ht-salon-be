@@ -51,4 +51,7 @@ public class Service extends AbstractModel<Long> {
     @Column(name = "modified_date")
     private LocalDateTime modifiedDate;
 
+    @Column(name = "image")
+    private String image;
+
 }
