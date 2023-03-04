@@ -4,9 +4,9 @@ import com.salon.ht.config.Constant;
 import com.salon.ht.constant.BookingStatus;
 import com.salon.ht.dto.PageDto;
 import com.salon.ht.dto.ServiceDto;
+import com.salon.ht.dto.WorkingTimeInformationDto;
 import com.salon.ht.entity.Booking;
 import com.salon.ht.entity.ServiceMap;
-import com.salon.ht.entity.UserEntity;
 import com.salon.ht.entity.payload.BookingRequest;
 import com.salon.ht.entity.payload.BookingResponse;
 import com.salon.ht.entity.payload.EmailResp;
@@ -28,23 +28,26 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import javax.mail.MessagingException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.salon.ht.common.FnCommon.convertStringToLDT;
 import static com.salon.ht.config.Constant.CONTENT_EMAIL_APPROVE;
-import static com.salon.ht.config.Constant.DATE_FORMAT;
+import static com.salon.ht.config.Constant.DATE_TIME_FORMATTER;
 
-@Service
+@org.springframework.stereotype.Service
 @Transactional
 public class BookingService extends AbstractService<Booking, Long> {
 
@@ -59,10 +62,11 @@ public class BookingService extends AbstractService<Booking, Long> {
     private final ServiceRepositoryImpl serviceRepositoryImpl;
     private final EmailService emailService;
     private final UserRepository userRepository;
+    private final RoleService roleService;
 
     public BookingService(BookingRepository bookingRepository, ServiceRepository serviceRepository, ServiceMapRepository serviceMapRepository,
                           ServiceMapper serviceMapper, BookingResMapper bookingResMapper, BookingRepositoryImpl bookingRepositoryImpl,
-                          ServiceRepositoryImpl serviceRepositoryImpl, EmailService emailService, UserRepository userRepository) {
+                          ServiceRepositoryImpl serviceRepositoryImpl, EmailService emailService, UserRepository userRepository, RoleService roleService) {
         this.bookingRepository = bookingRepository;
         this.serviceRepository = serviceRepository;
         this.serviceMapRepository = serviceMapRepository;
@@ -72,6 +76,7 @@ public class BookingService extends AbstractService<Booking, Long> {
         this.serviceRepositoryImpl = serviceRepositoryImpl;
         this.emailService = emailService;
         this.userRepository = userRepository;
+        this.roleService = roleService;
     }
 
     @Override
@@ -107,7 +112,7 @@ public class BookingService extends AbstractService<Booking, Long> {
             booking.setCode(generateNewBookingCode());
         }
         booking.setUserId(userDetails.getId());
-        booking.setTitle(String.format("%s %s", userDetails.getName(), DATE_FORMAT.format(startTime)));
+        booking.setTitle(String.format("%s %s", userDetails.getName(), DATE_TIME_FORMATTER.format(startTime)));
         booking.setChooseUserId(request.getChooseUserId());
         booking.setDescription(request.getDescription());
         booking.setStartTime(startTime);
@@ -159,7 +164,7 @@ public class BookingService extends AbstractService<Booking, Long> {
                 try {
                     emailService.sendEmail(resp.getEmail(), Constant.SUBJECT_EMAIL, String.format(status == 3 ?
                                     Constant.CONTENT_EMAIL_REJECT : CONTENT_EMAIL_APPROVE, resp.getUserName(),
-                            DATE_FORMAT.format(resp.getStartTime()), DATE_FORMAT.format(resp.getEndTime())));
+                            DATE_TIME_FORMATTER.format(resp.getStartTime()), DATE_TIME_FORMATTER.format(resp.getEndTime())));
                 } catch (Exception e) {
                     throw new BadRequestException("Có lỗi xảy ra!");
                 }
@@ -209,6 +214,44 @@ public class BookingService extends AbstractService<Booking, Long> {
         }
         bookingResponses.sort(Comparator.comparing(BookingResponse::getBookingStatus));
         return new PageDto<>(bookingPage, bookingResponses);
+    }
+
+    public List<String> getWorkingTimeInformation(Long userId, List<Long> serviceIds, String date) {
+        //cal duration
+        long duration = 0L;
+        List<ServiceDto> serviceDtos = new ArrayList<>();
+        serviceIds.forEach(id -> {
+            serviceDtos.add(serviceMapper.toDto(serviceRepository.getById(id)));
+        });
+        if (!CollectionUtils.isEmpty(serviceDtos)) {
+            duration = serviceDtos.stream().map(ServiceDto::getDuration).reduce(0L, Long::sum);
+        }
+        //get mapDate
+        Map<LocalTime,LocalTime> mapTime = new HashMap<>();
+        List<Booking> bookings = bookingRepository.findByUserChooseIds(userId, date);
+        bookings.forEach(booking -> {
+            mapTime.put(booking.getStartTime().toLocalTime(), booking.getEndTime().toLocalTime());
+        });
+        return getHourList(mapTime, duration);
+    }
+
+    public static List<String> getHourList(Map<LocalTime,LocalTime> mapTime, Long duration) {
+        List<LocalTime> hourList = new ArrayList<>();
+        // Duyệt qua từng giờ và thêm vào danh sách nếu không thuộc bất kỳ khoảng thời gian nào trong danh sách
+        for (int hour = 7; hour < 23; hour++) {
+            LocalTime time = LocalTime.of(hour, 0);
+            boolean shouldExclude = false;
+            for (Map.Entry<LocalTime, LocalTime> entry : mapTime.entrySet()) {
+                if (time.plusMinutes(duration).isAfter(entry.getKey())  && time.isBefore(entry.getValue())) {
+                    shouldExclude = true;
+                    break;
+                }
+            }
+            if (!shouldExclude) {
+                hourList.add(time);
+            }
+        }
+        return hourList.stream().map(Constant.TIME_FORMATTER::format).collect(Collectors.toList());
     }
 
 }

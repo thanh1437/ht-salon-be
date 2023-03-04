@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -24,5 +25,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query(value = "SELECT * FROM booking order by id desc limit 1", nativeQuery = true)
     Optional<Booking> findTopByOrderByIdDesc();
 
-    List<Booking> findByIdIn(List<Long> bookingIds);
+    @Query(value = "SELECT * FROM `booking` b WHERE b.choose_user_id = :userId " +
+            "AND DATE(b.start_time) = STR_TO_DATE(:date, '%d/%m/%Y') ORDER BY b.start_time ", nativeQuery = true)
+    List<Booking> findByUserChooseIds(Long userId, String date);
 }

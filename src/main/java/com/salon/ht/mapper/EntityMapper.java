@@ -37,6 +37,6 @@ public interface EntityMapper<D, E> {
         if (dateTime == null) {
             return null;
         }
-        return dateTime.format(Constant.DATE_FORMAT);
+        return dateTime.format(Constant.DATE_TIME_FORMATTER);
     }
 }

@@ -1,7 +1,10 @@
 package com.salon.ht.service;
 
+import com.salon.ht.config.Constant;
 import com.salon.ht.constant.RoleName;
 import com.salon.ht.constant.UserStatus;
+import com.salon.ht.dto.UserRoleDto;
+import com.salon.ht.entity.Booking;
 import com.salon.ht.entity.Department;
 import com.salon.ht.entity.Role;
 import com.salon.ht.entity.UserDepartment;
@@ -133,14 +136,15 @@ public class UserService extends AbstractService<UserEntity, Long> {
     }
 
     public UserEntity buildUserEntity(RegistrationRequest request) {
+        Set<Role> roles = new HashSet<>();
+        roles.add(roleService.findByName(request.getRole()).get());
         UserEntity newUser = new UserEntity();
-        boolean isNewUserAdmin = request.getRegisterAsAdmin();
         newUser.setEmail(request.getEmail());
         newUser.setUsername(request.getUsername());
         newUser.setName(request.getName());
         newUser.setMobile(request.getMobile());
         newUser.setPassword(passwordEncoder.encode(request.getPassword()));
-        newUser.setRoles(getRolesForNewUser(isNewUserAdmin));
+        newUser.setRoles(roles);
         newUser.setStatus(UserStatus.ACTIVE);
         return newUser;
     }
@@ -530,6 +534,14 @@ public class UserService extends AbstractService<UserEntity, Long> {
             errorMsg.append("Số điện thoại ").append(userCSV.getMobile()).append(" không đúng định dạng.\n");
         }
         return errorMsg;
+    }
+
+    public List<UserRoleDto> getUsersRoleEmployee() {
+        Optional<RoleDto> roleDto = roleService.getAllRoles().stream().filter(dto -> Constant.ROLES.ROLE_EMPLOYEE.name().equals(dto.getName())).findFirst();
+        if (roleDto.isPresent()) {
+            return roleDto.get().getUsers();
+        }
+        return new ArrayList<>();
     }
 
     @Override

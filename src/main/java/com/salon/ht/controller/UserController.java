@@ -160,4 +160,11 @@ public class UserController {
         String message = userService.importUserByCSV(file);
         return ResponseEntity.ok(new ApiResponse(true, message));
     }
+
+    @GetMapping("/get-users-role-employee")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
+    @ApiOperation(value = "API danh sách các thợ cắt tóc")
+    public ResponseEntity<?> getUsersRoleEmployee() {
+        return ResponseEntity.ok(userService.getUsersRoleEmployee());
+    }
 }

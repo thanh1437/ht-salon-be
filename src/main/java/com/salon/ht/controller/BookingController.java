@@ -1,10 +1,12 @@
 package com.salon.ht.controller;
 
 import com.salon.ht.annotation.CurrentUser;
+import com.salon.ht.dto.WorkingTimeInformationDto;
 import com.salon.ht.entity.payload.ApiResponse;
 import com.salon.ht.entity.payload.BookingRequest;
 import com.salon.ht.entity.payload.BookingResponse;
 import com.salon.ht.entity.payload.UpdateStatusListRequest;
+import com.salon.ht.entity.payload.WorkingTimeInformationRequest;
 import com.salon.ht.security.service.UserDetailsImpl;
 import com.salon.ht.service.BookingService;
 import io.swagger.annotations.ApiOperation;
@@ -79,5 +81,12 @@ public class BookingController {
             @RequestParam(value = "userId", required = false) Long userId
     ) {
         return ResponseEntity.ok(bookingService.getBookings(title, code, chooseUserId, userId, fromDate, toDate, status, page, pageSize));
+    }
+
+    @PostMapping("/get-working-time-information")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
+    @ApiOperation(value = "API lấy thông tin thời gian trống của nhân viên")
+    public ResponseEntity<?> getWorkingTimeInformation(@RequestBody WorkingTimeInformationRequest req) {
+        return ResponseEntity.ok(bookingService.getWorkingTimeInformation(req.getUserId(), req.getServiceIds(), req.getDate()));
     }
 }

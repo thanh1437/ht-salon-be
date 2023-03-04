@@ -11,6 +11,6 @@ public class DateHelper {
         if (localDateTime == null) {
             return null;
         }
-        return localDateTime.format(Constant.DATE_FORMAT);
+        return localDateTime.format(Constant.DATE_TIME_FORMATTER);
     }
 }

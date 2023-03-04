@@ -30,7 +30,7 @@ public class RegistrationRequest {
     @NotNull(message = "Specify whether the user has to be registered as an admin or not")
     @ApiModelProperty(value = "Flag denoting whether the user is an admin or not", required = true,
             dataType = "boolean", allowableValues = "true, false")
-    private Boolean registerAsAdmin;
+    private String role;
 
     @NotNull(message = "Mobile can't null")
     @ApiModelProperty(value = "A valid mobile string", required = true, allowableValues = "NonEmpty String")
