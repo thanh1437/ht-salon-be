@@ -31,28 +31,12 @@ public class ServiceRepositoryImpl extends EntityRepository implements ServiceRe
 
 
     @Override
-    public Page<Service> getServices(String name, String fromDate, String toDate, Integer status, Integer type, String code, PageRequest pageRequest) {
+    public Page<Service> getServices(String name, String code, PageRequest pageRequest) {
         String sqlWhere = "";
         Map<String, Object> params = new HashMap<>();
         if (name != null) {
             sqlWhere += " AND b.name LIKE :name";
             params.put("name", "%" + name + "%");
-        }
-
-        if (fromDate != null && !"".equalsIgnoreCase(fromDate) && toDate != null && !"".equalsIgnoreCase(toDate)) {
-            sqlWhere += " AND b.created_date between STR_TO_DATE(:fromDate, '%d/%m/%Y') AND STR_TO_DATE(:toDate, '%d/%m/%Y') ";
-            params.put("fromDate", fromDate);
-            params.put("toDate", toDate);
-        }
-
-        if (status != null) {
-            sqlWhere += " AND b.status= :status";
-            params.put("status", status);
-        }
-
-        if (type != null) {
-            sqlWhere += " AND b.type = :type";
-            params.put("type", type);
         }
 
         if (code != null) {

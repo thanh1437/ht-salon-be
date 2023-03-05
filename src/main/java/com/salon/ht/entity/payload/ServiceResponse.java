@@ -14,7 +14,7 @@ public class ServiceResponse implements Serializable {
 
     private String code;
 
-    private Integer type;
+    private Integer orderBy;
 
     private Long price;
 

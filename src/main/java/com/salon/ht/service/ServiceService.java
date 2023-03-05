@@ -15,6 +15,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -44,7 +45,7 @@ public class ServiceService {
         }
         service.setImage(serviceRequest.getImage());
         service.setName(serviceRequest.getName());
-        service.setType(serviceRequest.getType());
+        service.setOrderBy(serviceRequest.getOrderBy());
         service.setPrice(serviceRequest.getPrice());
         service.setDuration(serviceRequest.getDuration());
         service.setStatus(serviceRequest.getStatus());
@@ -70,17 +71,20 @@ public class ServiceService {
         }
     }
 
-    public PageDto<ServiceResponse> getServices(String name, String fromDate, String toDate, Integer status, Integer type, String code, Integer page, Integer pageSize) {
+    public PageDto<ServiceResponse> getServices(String name, String code, Integer page, Integer pageSize) {
         PageRequest pageRequest;
         if (page == null || pageSize == null) {
-            pageRequest = PageRequest.of(0, Integer.MAX_VALUE, Sort.Direction.ASC, "status");
+            pageRequest = PageRequest.of(0, Integer.MAX_VALUE);
         } else {
-            pageRequest = PageRequest.of(page - 1, pageSize, Sort.Direction.ASC, "status");
+            pageRequest = PageRequest.of(page - 1, pageSize);
         }
-        Page<Service> services = serviceRepositoryImpl.getServices(name, fromDate, toDate, status, type, code, pageRequest);
+        Page<Service> services = serviceRepositoryImpl.getServices(name, code, pageRequest);
         List<ServiceResponse> serviceResponses = serviceResMapper.toDto(services.getContent());
-        serviceResponses.sort(Comparator.comparing(ServiceResponse::getStatus));
 
+        Comparator<ServiceResponse> comparator = Comparator
+                .comparing(ServiceResponse::getStatus, Comparator.reverseOrder())
+                .thenComparing(ServiceResponse::getOrderBy);
+        Collections.sort(serviceResponses, comparator);
         return new PageDto<>(services, serviceResponses);
     }
 }

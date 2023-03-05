@@ -32,12 +32,10 @@ public class ServiceController {
     private final static Logger LOGGER = LoggerFactory.getLogger(ServiceController.class);
 
     private final ServiceService serviceService;
-    private final RedisTemplate<String, Object> redisTemplate;
 
 
-    public ServiceController(ServiceService serviceService, RedisTemplate<String, Object> redisTemplate) {
+    public ServiceController(ServiceService serviceService) {
         this.serviceService = serviceService;
-        this.redisTemplate = redisTemplate;
     }
 
     @PostMapping
@@ -62,31 +60,11 @@ public class ServiceController {
     @ApiOperation(value = "Tìm kiếm dịch vụ")
     public ResponseEntity<?> getServices(
             @RequestParam(value = "name", required = false) String name,
-            @RequestParam(value = "fromDate", required = false) String fromDate,
-            @RequestParam(value = "toDate", required = false) String toDate,
-            @RequestParam(value = "status", required = false) Integer status,
-            @RequestParam(value = "type", required = false) Integer type,
             @RequestParam(value = "code", required = false) String code,
             @RequestParam(value = "page", required = false) Integer page,
             @RequestParam(value = "pageSize", required = false) Integer pageSize
     ) {
-        return ResponseEntity.ok(serviceService.getServices(name, fromDate, toDate, status, type, code, page, pageSize));
+        return ResponseEntity.ok(serviceService.getServices(name, code, page, pageSize));
     }
-
-//    @GetMapping("/search")
-//    @PreAuthorize("hasAnyRole('ADMIN','USER')")
-//    @ApiOperation(value = "Tìm kiếm dịch vụ")
-//    public ResponseEntity<?> getStatisticServices(
-//            @RequestParam(value = "name", required = false) String name,
-//            @RequestParam(value = "fromDate", required = false) String fromDate,
-//            @RequestParam(value = "toDate", required = false) String toDate,
-//            @RequestParam(value = "status", required = false) Integer status,
-//            @RequestParam(value = "type", required = false) Integer type,
-//            @RequestParam(value = "code", required = false) String code,
-//            @RequestParam(value = "page", required = false) Integer page,
-//            @RequestParam(value = "pageSize", required = false) Integer pageSize
-//    ) {
-//        return ResponseEntity.ok(serviceService.getServices(name, fromDate, toDate, status, type, code, page, pageSize));
-//    }
 
 }

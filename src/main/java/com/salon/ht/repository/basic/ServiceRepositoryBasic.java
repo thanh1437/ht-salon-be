@@ -11,10 +11,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ServiceRepositoryBasic {
     Page<Service> getServices(@Param("name") String name,
-                              @Param("fromDate") String fromDate,
-                              @Param("toDate") String toDate,
-                              @Param("status") Integer status,
-                              @Param("type") Integer type,
                               @Param("code") String code,
                               PageRequest pageRequest);
 }

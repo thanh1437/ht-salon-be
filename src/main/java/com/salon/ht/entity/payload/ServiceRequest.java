@@ -15,9 +15,9 @@ public class ServiceRequest {
     @NullOrNotBlank(message = "Hãy chọn tên dịch vụ")
     private String name;
 
-    @ApiModelProperty(value = "Loại dịch vụ", dataType = "Integer", required = true)
-    @NotNull(message = "Hãy chọn loại dịch vụ")
-    private Integer type;
+    @ApiModelProperty(value = "Độ ưu tiên dịch vụ", dataType = "Integer", required = true)
+    @NotNull(message = "Hãy chọn độ ưu tiên cho dịch vụ")
+    private Integer orderBy;
 
     @ApiModelProperty(value = "Giá dịch vụ", dataType = "Long", required = true)
     @NotNull(message = "Hãy chọn giá dịch vụ")

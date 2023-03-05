@@ -27,8 +27,8 @@ public class Service extends AbstractModel<Long> {
     @Column(name = "code")
     private String code;
 
-    @Column(name = "type")  // (dichvu/kieutoc 0/1)
-    private Integer type;
+    @Column(name = "order_by")
+    private Integer orderBy;
 
     @Column(name = "price")
     private Long price;
