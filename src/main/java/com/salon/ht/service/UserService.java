@@ -3,15 +3,17 @@ package com.salon.ht.service;
 import com.salon.ht.config.Constant;
 import com.salon.ht.constant.RoleName;
 import com.salon.ht.constant.UserStatus;
+import com.salon.ht.dto.PageDto;
+import com.salon.ht.dto.RoleDto;
+import com.salon.ht.dto.UserDeptDto;
+import com.salon.ht.dto.UserDto;
 import com.salon.ht.dto.UserRoleDto;
-import com.salon.ht.entity.Booking;
 import com.salon.ht.entity.Department;
 import com.salon.ht.entity.Role;
 import com.salon.ht.entity.UserDepartment;
 import com.salon.ht.entity.UserEntity;
 import com.salon.ht.entity.payload.RegistrationRequest;
 import com.salon.ht.entity.payload.RegistrationUserRequest;
-import com.salon.ht.entity.payload.UserDeptRegistrationRequest;
 import com.salon.ht.exception.BadRequestException;
 import com.salon.ht.exception.ImportUserException;
 import com.salon.ht.exception.ResourceAlreadyInUseException;
@@ -22,10 +24,6 @@ import com.salon.ht.mapper.csv.UserCSV;
 import com.salon.ht.repository.UserRepository;
 import com.salon.ht.repository.basic.UserRepositoryBasicImpl;
 import com.salon.ht.security.service.UserDetailsImpl;
-import com.salon.ht.dto.PageDto;
-import com.salon.ht.dto.RoleDto;
-import com.salon.ht.dto.UserDeptDto;
-import com.salon.ht.dto.UserDto;
 import com.salon.ht.util.ExcelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +40,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -153,17 +158,15 @@ public class UserService extends AbstractService<UserEntity, Long> {
         return userRepository.findById(userId).map(this::setUserDto).orElseThrow(() -> new ResourceNotFoundException("User", "UserId", userId));
     }
 
-    public void createUser(RegistrationUserRequest userRequest, MultipartFile photo) {
+    public void createUser(RegistrationUserRequest userRequest) {
         try {
             // Create User entity
             if (this.existsByEmail(userRequest.getEmail())) {
                 throw new ResourceAlreadyInUseException("Email", "địa chỉ", userRequest.getEmail());
             }
-
             if (this.existsByUsername(userRequest.getUsername())) {
                 throw new ResourceAlreadyInUseException("Tài khoản người dùng", "tên tài khoản", userRequest.getEmail());
             }
-
             UserEntity user = new UserEntity();
             user.setUsername(userRequest.getUsername());
             user.setEmail(userRequest.getEmail());
@@ -171,32 +174,13 @@ public class UserService extends AbstractService<UserEntity, Long> {
             user.setMobile(userRequest.getMobile());
             user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
             user.setStatus(UserStatus.ACTIVE);
-            Long roleId = userRequest.getRoleId();
-            Role role = roleService.get(roleId);
+            user.setPhoto(userRequest.getPhoto());
+            Role role = roleService.findByName(userRequest.getRole()).get();
             Set<Role> roles = new HashSet<>();
             roles.add(role);
             user.setRoles(roles);
-            List<UserDeptRegistrationRequest> userDepts = userRequest.getUserDepts();
             // save user
             this.save(user);
-            Set<UserDepartment> userDepartments = new HashSet<>();
-            userDepts.forEach(userDeptRegistrationRequest -> {
-                UserDepartment userDepartment = new UserDepartment();
-                userDepartment.setUser(user);
-                Department department = departmentService.get(userDeptRegistrationRequest.getId());
-                userDepartment.setDepartment(department);
-                userDepartment.setIsAdmin(userDeptRegistrationRequest.getIsAdmin());
-                userDepartment.setIsRoot(userDeptRegistrationRequest.getIsRoot());
-                userDepartment.setJobTile(userDeptRegistrationRequest.getPosition());
-                userDepartment.setPosition(userDeptRegistrationRequest.getPosition());
-                userDepartments.add(userDepartment);
-            });
-
-            // save user department
-            userDepartments.forEach(userDepartmentService::save);
-
-            // save photo to server and save path to db
-            uploadPhoto(photo, user);
         } catch (Exception e) {
             throw new UserRegistrationException(userRequest.getUsername(), e.getMessage());
         }
@@ -235,26 +219,12 @@ public class UserService extends AbstractService<UserEntity, Long> {
                 user.setMobile(request.getMobile());
                 user.setEmail(request.getEmail());
                 user.setModifiedDate(new Date());
-                Long roleId = request.getRoleId();
-                UserDeptRegistrationRequest deptRegistrationRequest = request.getUserDepts().get(0);
-                // check neu role id o request khac role id hien tai cua user thi update con ko thi them moi
-                if (user.getRoles().size() > 0) {
-                    Role oldRole = user.getRoles().iterator().next();
-                    Long oldRoleId = oldRole.getId();
-                    if (!oldRoleId.equals(roleId)) {
-                        Role role = roleService.get(roleId);
-                        Set<Role> roles = new HashSet<>();
-                        roles.add(role);
-                        user.setRoles(roles);
-                    }
-                } else {
-                    Role role = roleService.get(roleId);
-                    Set<Role> roles = new HashSet<>();
-                    roles.add(role);
-                    user.setRoles(roles);
-                }
+                user.setPhoto(request.getPhoto());
+                Role role = roleService.findByName(request.getRole()).get();
+                Set<Role> roles = new HashSet<>();
+                roles.add(role);
+                user.setRoles(roles);
                 userRepository.save(user);
-                uploadPhoto(file, user);
             } else {
                 throw new ResourceNotFoundException("Nhân viên", "ID", request.getId());
             }
@@ -372,71 +342,6 @@ public class UserService extends AbstractService<UserEntity, Long> {
         UserEntity user = userEntity.get();
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
-    }
-
-    public void changeUserPhoto(UserDetailsImpl currentUser, MultipartFile photo) {
-        Optional<UserEntity> userEntityOptional = userRepository.findById(currentUser.getId());
-        if (userEntityOptional.isPresent()) {
-            UserEntity user = userEntityOptional.get();
-            uploadPhoto(photo, user);
-        } else {
-            throw new ResourceNotFoundException("Nhân viên", "ID", currentUser.getId());
-        }
-    }
-
-    public void uploadPhoto(MultipartFile file, UserEntity user) {
-        String photoPathDB = "";
-        String imgName = "";
-        boolean isDelete = true;
-        try {
-            if (file != null) {
-                String requestFileName = file.getOriginalFilename();
-                String absolutePath = rootPath;
-                File imgFolder = new File(absolutePath);
-                if (requestFileName != null) {
-                    imgName += user.getUsername() + requestFileName.substring(requestFileName.lastIndexOf("."));
-                } else {
-                    throw new BadRequestException("Ảnh nhân viên không đúng định dạng");
-                }
-                photoPathDB += relativePath + "/" + imgName;
-
-                if (user.getPhoto() != null && !user.getPhoto().equals(photoPathDB) && !user.getPhoto().equals(relativePath + defaultPhotoName)) {
-                    String oldImgName = user.getPhoto().substring(user.getPhoto().lastIndexOf("/"));
-                    File oldPhoto = new File(rootPath + oldImgName);
-                    isDelete = oldPhoto.delete();
-                }
-
-                // check when delete photo successfully then save new photo
-                if (isDelete) {
-                    if (!imgFolder.exists()) {
-                        imgFolder.mkdirs();
-                    }
-                    file.transferTo(new File(imgFolder, imgName));
-                    user.setPhoto(photoPathDB);
-                    user.setModifiedDate(new Date());
-                    userRepository.save(user);
-                } else {
-                    throw new UploadFileException("Xoá ảnh cũ thất bại!");
-                }
-            } else {
-                // check trong trường hợp thêm mới user và ko truyền image lên
-                if (user.getPhoto() == null) {
-                    String photo = this.relativePath + this.defaultPhotoName;
-                    user.setPhoto(photo);
-                    user.setModifiedDate(new Date());
-                    userRepository.save(user);
-                }
-            }
-        } catch (Exception e) {
-            // check trong trường hợp thêm mới user và ko truyền image lên
-            String photo = this.relativePath + this.defaultPhotoName;
-            user.setPhoto(photo);
-            user.setModifiedDate(new Date());
-            userRepository.save(user);
-            LOGGER.error("Xảy ra lỗi khi lưu ảnh nhân viên {}", e.getMessage());
-            throw new UploadFileException("Xảy ra lỗi khi lưu ảnh của nhân viên: " + e.getMessage());
-        }
-
     }
 
     public String importUserByCSV(MultipartFile file) {

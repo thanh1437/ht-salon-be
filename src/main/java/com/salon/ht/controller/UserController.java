@@ -72,8 +72,7 @@ public class UserController {
     @PostMapping()
     @ApiOperation(value = "API tạo mới người dùng hệ thống", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> createUser(@Valid @RequestPart("user") String user,
-                                        @RequestPart(value = "photo", required = false) MultipartFile photo) {
+    public ResponseEntity<?> createUser(@Valid @RequestPart("user") String user) {
         LOGGER.info("User create req {}", user);
         RegistrationUserRequest request;
         try {
@@ -81,7 +80,7 @@ public class UserController {
         } catch (Exception e) {
             throw new BadRequestException("Không thể đọc được dữ liệu user truyền lên. Hãy xem lại các trường dữ liệu truyền lên");
         }
-        userService.createUser(request, photo);
+        userService.createUser(request);
         return ResponseEntity.ok(new ApiResponse(true, "Thêm mới nhân viên vào hệ thống thành công!"));
     }
 
@@ -125,16 +124,6 @@ public class UserController {
         userService.resetPassword(userId, newPassword, confirmNewPassword);
 
         return ResponseEntity.ok(new ApiResponse(true, "Cập nhật mật khẩu người dùng thành công!"));
-    }
-
-    @PostMapping("/upload_photo")
-    @ApiOperation(value = "API để thay đổi ảnh đại diện của nhân viên")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<?> uploadPhoto(@RequestPart(value = "photo") MultipartFile photo,
-                                         @CurrentUser UserDetailsImpl currentUser) {
-
-        userService.changeUserPhoto(currentUser, photo);
-        return ResponseEntity.ok(new ApiResponse(true, "Cập nhật ảnh thành công!"));
     }
 
     @PostMapping("/update")

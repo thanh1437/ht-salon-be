@@ -36,11 +36,11 @@ public class RegistrationUserRequest implements Serializable {
     @NotNull(message = "Email người dùng không được trống")
     private String email;
 
-    @ApiModelProperty(value = "Id quyền", dataType = "Long", required = true)
-    @NotNull(message = "Id quyền không được trống")
-    private Long roleId;
+    @ApiModelProperty(value = "Id quyền", dataType = "String", required = true)
+    @NotNull(message = "Quyền không được trống")
+    private String role;
 
-    @ApiModelProperty(value = "Người dùng thuộc phòng ban hiện tại", dataType = "", required = true)
-    @NotEmpty(message = "Phải có tham dố danh sách nhân viên thuộc phòng ban. Danh sách có thể rỗng")
-    private List<UserDeptRegistrationRequest> userDepts;
+    @ApiModelProperty(value = "Ảnh người dùng", dataType = "String", required = true)
+    @NotEmpty(message = "Ảnh người dùng không thể bỏ trống")
+    private String photo;
 }
