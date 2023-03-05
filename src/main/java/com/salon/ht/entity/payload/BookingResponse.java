@@ -1,6 +1,7 @@
 package com.salon.ht.entity.payload;
 
 import com.salon.ht.constant.BookingStatus;
+import com.salon.ht.dto.ComboDto;
 import com.salon.ht.dto.ServiceDto;
 import lombok.Data;
 
@@ -39,4 +40,6 @@ public class BookingResponse implements Serializable {
     private String modifiedDate;
 
     private List<ServiceDto> serviceDtos;
+
+    private List<ComboDto> comboDtos;
 }

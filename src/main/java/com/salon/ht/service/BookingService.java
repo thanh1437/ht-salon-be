@@ -4,16 +4,18 @@ import com.salon.ht.config.Constant;
 import com.salon.ht.constant.BookingStatus;
 import com.salon.ht.dto.PageDto;
 import com.salon.ht.dto.ServiceDto;
-import com.salon.ht.dto.WorkingTimeInformationDto;
 import com.salon.ht.entity.Booking;
+import com.salon.ht.entity.Service;
 import com.salon.ht.entity.ServiceMap;
 import com.salon.ht.entity.payload.BookingRequest;
 import com.salon.ht.entity.payload.BookingResponse;
 import com.salon.ht.entity.payload.EmailResp;
 import com.salon.ht.exception.BadRequestException;
 import com.salon.ht.mapper.BookingResMapper;
+import com.salon.ht.mapper.ComboMapper;
 import com.salon.ht.mapper.ServiceMapper;
 import com.salon.ht.repository.BookingRepository;
+import com.salon.ht.repository.ComboRepository;
 import com.salon.ht.repository.ServiceMapRepository;
 import com.salon.ht.repository.ServiceRepository;
 import com.salon.ht.repository.UserRepository;
@@ -31,8 +33,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import javax.mail.MessagingException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -63,10 +63,13 @@ public class BookingService extends AbstractService<Booking, Long> {
     private final EmailService emailService;
     private final UserRepository userRepository;
     private final RoleService roleService;
+    private final ComboRepository comboRepository;
+    private final ComboMapper comboMapper;
 
     public BookingService(BookingRepository bookingRepository, ServiceRepository serviceRepository, ServiceMapRepository serviceMapRepository,
                           ServiceMapper serviceMapper, BookingResMapper bookingResMapper, BookingRepositoryImpl bookingRepositoryImpl,
-                          ServiceRepositoryImpl serviceRepositoryImpl, EmailService emailService, UserRepository userRepository, RoleService roleService) {
+                          ServiceRepositoryImpl serviceRepositoryImpl, EmailService emailService, UserRepository userRepository,
+                          RoleService roleService, ComboRepository comboRepository, ComboMapper comboMapper) {
         this.bookingRepository = bookingRepository;
         this.serviceRepository = serviceRepository;
         this.serviceMapRepository = serviceMapRepository;
@@ -77,6 +80,8 @@ public class BookingService extends AbstractService<Booking, Long> {
         this.emailService = emailService;
         this.userRepository = userRepository;
         this.roleService = roleService;
+        this.comboRepository = comboRepository;
+        this.comboMapper = comboMapper;
     }
 
     @Override
@@ -84,20 +89,27 @@ public class BookingService extends AbstractService<Booking, Long> {
         return bookingRepository;
     }
 
-    public BookingResponse createOrUpdateBooking(UserDetailsImpl userDetails, BookingRequest request) throws MessagingException {
+    public BookingResponse createOrUpdateBooking(UserDetailsImpl userDetails, BookingRequest request) {
         if (request.getId() != null && !bookingRepository.existsById(request.getId())) {
             throw new BadRequestException("Lịch đặt không tồn tại");
         }
 
-        List<Long> curentServiceIds = new ArrayList<>();
         LocalDateTime startTime = convertStringToLDT(request.getStartTime());
         List<ServiceDto> reqServiceDtos = new ArrayList<>();
-        request.getServiceIds().forEach(id -> {
-            reqServiceDtos.add(serviceMapper.toDto(serviceRepository.getById(id)));
-        });
+        List<ServiceDto> serviceCalDtos = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(request.getServiceIds())) {
+            request.getServiceIds().forEach(id -> {
+                reqServiceDtos.add(serviceMapper.toDto(serviceRepository.getById(id)));
+            });
+            serviceCalDtos.addAll(reqServiceDtos);
+        }
 
-        List<Long> reqServiceIds = request.getServiceIds();
-        LocalDateTime endTime = startTime.plusMinutes(reqServiceDtos
+        if (!CollectionUtils.isEmpty(request.getComboIds())) {
+            List<Service> services = serviceRepository.findByComboIds(request.getComboIds());
+            serviceCalDtos.addAll(serviceMapper.toDto(services));
+        }
+
+        LocalDateTime endTime = startTime.plusMinutes(serviceCalDtos
                 .stream().map(ServiceDto::getDuration).reduce(0L, Long::sum));
 
         Booking booking = new Booking();
@@ -107,7 +119,6 @@ public class BookingService extends AbstractService<Booking, Long> {
             booking.setId(request.getId());
             booking.setModifiedBy(userDetails.getName());
             booking.setModifiedDate(LocalDateTime.now());
-            curentServiceIds = serviceMapRepository.findServiceIdsByPkId(request.getId());
         } else {
             booking.setCode(generateNewBookingCode());
         }
@@ -123,20 +134,26 @@ public class BookingService extends AbstractService<Booking, Long> {
         booking = bookingRepository.save(booking);
         Long bookingId = booking.getId();
 
-        if (CollectionUtils.isEmpty(curentServiceIds) || !reqServiceIds.containsAll(curentServiceIds) || !curentServiceIds.containsAll(reqServiceIds)
-                || reqServiceIds.size() != curentServiceIds.size()) {
-            serviceMapRepository.updateStatusByPkId(request.getId(), Constant.SERVICE_MAP.BOOKING.name(), 0);
-
-            List<ServiceMap> serviceMaps = new ArrayList<>();
-            reqServiceDtos.forEach(service -> {
-                ServiceMap serviceMap = new ServiceMap(bookingId, service.getId(), userDetails.getId(), Constant.SERVICE_MAP.BOOKING.name(), 1);
+        List<ServiceMap> serviceMaps = new ArrayList<>();
+        reqServiceDtos.forEach(service -> {
+            ServiceMap serviceMap = new ServiceMap(bookingId, service.getId(), null, userDetails.getId(), Constant.SERVICE_MAP.BOOKING.name(), 1);
+            serviceMaps.add(serviceMap);
+        });
+        if (!CollectionUtils.isEmpty(request.getComboIds())) {
+            request.getComboIds().forEach(comboId -> {
+                ServiceMap serviceMap = new ServiceMap(bookingId, null, comboId, userDetails.getId(), Constant.SERVICE_MAP.BOOKING_COMBO.name(), 1);
                 serviceMaps.add(serviceMap);
             });
-            serviceMapRepository.saveAll(serviceMaps);
         }
+        serviceMapRepository.saveAll(serviceMaps);
 
         BookingResponse bookingResponse = bookingResMapper.toDto(booking);
-        bookingResponse.setServiceDtos(reqServiceDtos);
+        if (!CollectionUtils.isEmpty(reqServiceDtos)) {
+            bookingResponse.setServiceDtos(reqServiceDtos);
+        }
+        if (!CollectionUtils.isEmpty(request.getComboIds())) {
+            bookingResponse.setComboDtos(comboMapper.toDto(comboRepository.findByIdIn(request.getComboIds())));
+        }
         bookingResponse.setId(bookingId);
         return bookingResponse;
     }
@@ -216,18 +233,26 @@ public class BookingService extends AbstractService<Booking, Long> {
         return new PageDto<>(bookingPage, bookingResponses);
     }
 
-    public List<String> getWorkingTimeInformation(Long userId, List<Long> serviceIds, String date) {
+    public List<String> getWorkingTimeInformation(Long userId, List<Long> serviceIds, List<Long> comboIds, String date) {
         //cal duration
         long duration = 0L;
         List<ServiceDto> serviceDtos = new ArrayList<>();
-        serviceIds.forEach(id -> {
-            serviceDtos.add(serviceMapper.toDto(serviceRepository.getById(id)));
-        });
+
+        if (!CollectionUtils.isEmpty(serviceIds)) {
+            serviceIds.forEach(id -> {
+                serviceDtos.add(serviceMapper.toDto(serviceRepository.getById(id)));
+            });
+        }
+        if (!CollectionUtils.isEmpty(comboIds)) {
+            List<Service> services = serviceRepository.findByComboIds(comboIds);
+            serviceDtos.addAll(serviceMapper.toDto(services));
+        }
+
         if (!CollectionUtils.isEmpty(serviceDtos)) {
             duration = serviceDtos.stream().map(ServiceDto::getDuration).reduce(0L, Long::sum);
         }
         //get mapDate
-        Map<LocalTime,LocalTime> mapTime = new HashMap<>();
+        Map<LocalTime, LocalTime> mapTime = new HashMap<>();
         List<Booking> bookings = bookingRepository.findByUserChooseIds(userId, date);
         bookings.forEach(booking -> {
             mapTime.put(booking.getStartTime().toLocalTime(), booking.getEndTime().toLocalTime());
@@ -235,14 +260,14 @@ public class BookingService extends AbstractService<Booking, Long> {
         return getHourList(mapTime, duration);
     }
 
-    public static List<String> getHourList(Map<LocalTime,LocalTime> mapTime, Long duration) {
+    public static List<String> getHourList(Map<LocalTime, LocalTime> mapTime, Long duration) {
         List<LocalTime> hourList = new ArrayList<>();
         // Duyệt qua từng giờ và thêm vào danh sách nếu không thuộc bất kỳ khoảng thời gian nào trong danh sách
         for (int hour = 7; hour < 23; hour++) {
             LocalTime time = LocalTime.of(hour, 0);
             boolean shouldExclude = false;
             for (Map.Entry<LocalTime, LocalTime> entry : mapTime.entrySet()) {
-                if (time.plusMinutes(duration).isAfter(entry.getKey())  && time.isBefore(entry.getValue())) {
+                if (time.plusMinutes(duration).isAfter(entry.getKey()) && time.isBefore(entry.getValue())) {
                     shouldExclude = true;
                     break;
                 }

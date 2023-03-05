@@ -20,4 +20,8 @@ public interface ServiceRepository extends JpaRepository<Service, Long>{
     @Query(value = "UPDATE service c set c.status = :status WHERE c.id IN :ids", nativeQuery = true)
     @Transactional
     void updateStatus(List<Long> ids, Integer status);
+
+    @Query(value = "SELECT s.* FROM service s LEFT JOIN service_map sm ON s.id = sm.service_id " +
+            "WHERE sm.table_name = 'COMBO' AND sm.pk_id IN :comboIds ", nativeQuery = true)
+    List<Service> findByComboIds(List<Long> comboIds);
 }

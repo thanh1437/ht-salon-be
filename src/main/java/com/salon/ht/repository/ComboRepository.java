@@ -22,4 +22,6 @@ public interface ComboRepository extends JpaRepository<Combo, Long> {
     void updateStatus(List<Long> comboIds, Integer status);
 
     Optional<Combo> findTopByOrderByIdDesc();
+
+    List<Combo> findByIdIn(List<Long> comboIds);
 }

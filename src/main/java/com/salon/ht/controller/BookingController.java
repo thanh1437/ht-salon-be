@@ -87,6 +87,6 @@ public class BookingController {
     @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @ApiOperation(value = "API lấy thông tin thời gian trống của nhân viên")
     public ResponseEntity<?> getWorkingTimeInformation(@RequestBody WorkingTimeInformationRequest req) {
-        return ResponseEntity.ok(bookingService.getWorkingTimeInformation(req.getUserId(), req.getServiceIds(), req.getDate()));
+        return ResponseEntity.ok(bookingService.getWorkingTimeInformation(req.getUserId(), req.getServiceIds(), req.getComboIds(), req.getDate()));
     }
 }

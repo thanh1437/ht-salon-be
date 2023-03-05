@@ -9,4 +9,5 @@ public class WorkingTimeInformationRequest {
     Long userId;
     String date;
     List<Long> serviceIds;
+    List<Long> comboIds;
 }

@@ -15,6 +15,7 @@ public class Constant {
     public static final String CONTENT_EMAIL_REJECT = "Kinh gửi %s ! \n Lịch cắt tóc của bạn vào %s đến %s đã bị từ chối. Chúng tôi xin lỗi vì sự cố này.";
 
     public enum SERVICE_MAP {
+        BOOKING_COMBO,
         BOOKING,
         COMBO
     }

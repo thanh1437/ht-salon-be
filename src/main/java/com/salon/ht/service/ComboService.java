@@ -89,7 +89,7 @@ public class ComboService {
             serviceMapRepository.updateStatusByPkId(comboId, Constant.SERVICE_MAP.COMBO.name(), 0);
             List<ServiceMap> serviceMapList = new ArrayList<>();
             reqServiceIds.forEach(serviceId -> {
-                ServiceMap serviceMap = new ServiceMap(comboId, serviceId, userDetails.getId(), Constant.SERVICE_MAP.COMBO.name(), 1);
+                ServiceMap serviceMap = new ServiceMap(comboId, serviceId, comboId, userDetails.getId(), Constant.SERVICE_MAP.COMBO.name(), 1);
                 serviceMapList.add(serviceMap);
             });
             serviceMapRepository.saveAll(serviceMapList);

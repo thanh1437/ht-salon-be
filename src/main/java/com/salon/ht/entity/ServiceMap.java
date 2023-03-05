@@ -25,6 +25,9 @@ public class ServiceMap extends AbstractModel<Long> {
     @Column(name = "service_id", updatable = false)
     private Long serviceId;
 
+    @Column(name = "combo_id", updatable = false)
+    private Long comboId;
+
     @Column(name = "user_id", updatable = false)
     private Long userId;
 

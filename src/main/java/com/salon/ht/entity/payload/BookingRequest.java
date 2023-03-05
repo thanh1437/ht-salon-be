@@ -37,6 +37,4 @@ public class BookingRequest implements Serializable {
     @ApiModelProperty(value = "Danh sách combo")
     private List<Long> comboIds;
 
-    private boolean isCombo;
-
 }
