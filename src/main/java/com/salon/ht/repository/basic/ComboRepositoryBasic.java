@@ -9,6 +9,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ComboRepositoryBasic {
     Page<Combo> getCombos(@Param("name") String name,
-                          @Param("code") String code,
                           PageRequest pageRequest);
 }

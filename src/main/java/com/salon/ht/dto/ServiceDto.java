@@ -14,6 +14,8 @@ public class ServiceDto implements Serializable {
 
     private Long id;
 
+    private String code;
+
     private String name;
 
     private Integer type;
@@ -34,10 +36,11 @@ public class ServiceDto implements Serializable {
 
     private Long pkId;
 
-    public ServiceDto(Long id, String name, Integer type, Long price, Long duration,
+    public ServiceDto(Long id, String name, String code, Integer type, Long price, Long duration,
                       Integer status, Long pkId) {
         this.id = id;
         this.name = name;
+        this.code = code;
         this.type = type;
         this.price = price;
         this.duration = duration;

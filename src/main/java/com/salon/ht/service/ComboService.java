@@ -77,6 +77,7 @@ public class ComboService {
         } else {
             combo.setCode(generateNewComboCode());
         }
+        combo.setImage(comboDto.getImage());
         combo.setName(comboDto.getName());
         combo.setPrice(comboDto.getPrice());
         combo.setStatus(comboDto.getStatus());
@@ -112,22 +113,14 @@ public class ComboService {
         return String.format("%s%04d", "C", newCode);
     }
 
-    public void updateComboStatusList(List<Long> comboIds, Integer status) {
-        try {
-            comboRepository.updateStatus(comboIds, status);
-        } catch (Exception e) {
-            throw new BadRequestException("Có lỗi xảy ra!");
-        }
-    }
-
-    public PageDto<ComboResponse> getCombos(String name, String code, Integer page, Integer pageSize) {
+    public PageDto<ComboResponse> getCombos(String name, Integer page, Integer pageSize) {
         PageRequest pageRequest;
         if (page == null || pageSize == null) {
-            pageRequest = PageRequest.of(0, Integer.MAX_VALUE, Sort.Direction.ASC, "status");
+            pageRequest = PageRequest.of(0, Integer.MAX_VALUE);
         } else {
-            pageRequest = PageRequest.of(page - 1, pageSize, Sort.Direction.ASC, "status");
+            pageRequest = PageRequest.of(page - 1, pageSize);
         }
-        Page<Combo> bookings = comboRepositoryImpl.getCombos(name, code, pageRequest);
+        Page<Combo> bookings = comboRepositoryImpl.getCombos(name, pageRequest);
         return setPageDto(bookings);
     }
 
@@ -137,8 +130,7 @@ public class ComboService {
         List<ServiceDto> serviceDtos = serviceRepositoryImpl.getServiceDtosByPkIdsAndTableName(combos
                 .stream().map(Combo::getId).collect(Collectors.toList()), Constant.SERVICE_MAP.COMBO.name());
         for (Combo combo : combos) {
-            ComboResponse comboResponse = new ComboResponse();
-            BeanUtils.copyProperties(combo, comboResponse);
+            ComboResponse comboResponse = comboResMapper.toDto(combo);
             comboResponse.setServiceDtos(serviceDtos.stream().filter(serviceDto -> serviceDto.getPkId()
                     .equals(combo.getId())).collect(Collectors.toList()));
             comboResponse.setId(combo.getId());

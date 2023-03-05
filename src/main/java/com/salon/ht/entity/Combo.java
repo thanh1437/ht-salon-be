@@ -29,6 +29,9 @@ public class Combo extends AbstractModel<Long> {
     @Column (name = "price")
     private Long price;
 
+    @Column (name = "image")
+    private String image;
+
     @Column (name = "status")
     private  Integer status;
 

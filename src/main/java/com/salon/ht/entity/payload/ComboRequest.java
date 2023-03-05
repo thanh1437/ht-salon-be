@@ -28,4 +28,8 @@ public class ComboRequest {
     @NotNull(message = "Hãy chọn dịch vụ")
     private List<Long> serviceIds;
 
+    @ApiModelProperty(value = "Ảnh", dataType = "String", required = true)
+    @NotNull(message = "Hãy chọn ảnh")
+    private String image;
+
 }

@@ -52,11 +52,10 @@ public class ComboController {
     @ApiOperation(value = "Tìm kiếm combo")
     public ResponseEntity<?> getCombos(
             @RequestParam(value = "name", required = false) String name,
-            @RequestParam(value = "code", required = false) String code,
             @RequestParam(value = "page", required = false) Integer page,
             @RequestParam(value = "pageSize", required = false) Integer pageSize
     ) {
-        return ResponseEntity.ok(comboService.getCombos(name, code, page, pageSize));
+        return ResponseEntity.ok(comboService.getCombos(name, page, pageSize));
     }
 
 }

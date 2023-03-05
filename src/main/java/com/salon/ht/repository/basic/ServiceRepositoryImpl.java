@@ -21,7 +21,7 @@ public class ServiceRepositoryImpl extends EntityRepository implements ServiceRe
     private EntityManager entityManager;
 
     public List<ServiceDto> getServiceDtosByPkIdsAndTableName(List<Long> pkId, String tableName) {
-        String jpql = "SELECT NEW com.salon.ht.dto.ServiceDto(s.id, s.name, s.orderBy, s.price, s.duration, s.status, sl.pkId) " +
+        String jpql = "SELECT NEW com.salon.ht.dto.ServiceDto(s.id, s.name, s.code, s.orderBy, s.price, s.duration, s.status, sl.pkId) " +
                 "FROM ServiceMap sl LEFT JOIN Service s ON sl.serviceId = s.id WHERE sl.pkId IN :pkId AND sl.tableName = :tableName";
         TypedQuery<ServiceDto> query = entityManager.createQuery(jpql, ServiceDto.class);
         query.setParameter("pkId", pkId);

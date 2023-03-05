@@ -260,9 +260,9 @@ public class BookingService extends AbstractService<Booking, Long> {
                                                 String fromDate, String toDate, Integer status, Integer page, Integer pageSize) {
         PageRequest pageRequest;
         if (page == null || pageSize == null) {
-            pageRequest = PageRequest.of(0, Integer.MAX_VALUE, Sort.Direction.ASC, "status");
+            pageRequest = PageRequest.of(0, Integer.MAX_VALUE);
         } else {
-            pageRequest = PageRequest.of(page - 1, pageSize, Sort.Direction.ASC, "status");
+            pageRequest = PageRequest.of(page - 1, pageSize);
         }
         Page<Booking> bookings = bookingRepositoryImpl.getBooking(title, code, chooseUserId, userId, fromDate, toDate, status, pageRequest);
         return setPageDto(bookings);

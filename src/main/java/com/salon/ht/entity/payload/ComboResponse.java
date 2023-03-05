@@ -17,6 +17,8 @@ public class ComboResponse implements Serializable {
 
     private Long price;
 
+    private String image;
+
     private Integer status;
 
     private String createBy;
