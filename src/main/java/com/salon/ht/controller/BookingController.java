@@ -1,10 +1,11 @@
 package com.salon.ht.controller;
 
 import com.salon.ht.annotation.CurrentUser;
-import com.salon.ht.dto.WorkingTimeInformationDto;
 import com.salon.ht.entity.payload.ApiResponse;
 import com.salon.ht.entity.payload.BookingRequest;
 import com.salon.ht.entity.payload.BookingResponse;
+import com.salon.ht.entity.payload.UpdateBookingRequest;
+import com.salon.ht.entity.payload.UpdateBookingResponse;
 import com.salon.ht.entity.payload.UpdateStatusListRequest;
 import com.salon.ht.entity.payload.WorkingTimeInformationRequest;
 import com.salon.ht.security.service.UserDetailsImpl;
@@ -24,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.mail.MessagingException;
 import javax.validation.Valid;
 
 @RestController
@@ -44,10 +44,20 @@ public class BookingController {
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','USER','EMPLOYEE')")
     @ApiOperation(value = "Đặt yêu cầu")
-    public ResponseEntity<?> createOrUpdateBooking(@CurrentUser UserDetailsImpl userDetails, @Valid @RequestBody BookingRequest bookingRequest) throws MessagingException {
-        BookingResponse bookingResponse = bookingService.createOrUpdateBooking(userDetails, bookingRequest);
+    public ResponseEntity<?> createBooking(@CurrentUser UserDetailsImpl userDetails, @Valid @RequestBody BookingRequest bookingRequest) {
+        BookingResponse bookingResponse = bookingService.createBooking(userDetails, bookingRequest);
         LOGGER.info("Booking successfully with booking request {}", bookingRequest);
         return ResponseEntity.ok(bookingResponse);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','USER','EMPLOYEE')")
+    @ApiOperation(value = "Cập nhật yêu cầu")
+    public ResponseEntity<?> updateBooking(@PathVariable("id") Long id, @CurrentUser UserDetailsImpl userDetails,
+                                           @Valid @RequestBody UpdateBookingRequest bookingRequest) {
+        UpdateBookingResponse updateBookingResponse = bookingService.updateBooking(userDetails, bookingRequest, id);
+        LOGGER.info("Booking successfully with booking request {}", bookingRequest);
+        return ResponseEntity.ok(updateBookingResponse);
     }
 
     @ApiOperation(value = "Cập nhật trạng thái các yêu cầu đặt lịch")

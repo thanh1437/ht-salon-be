@@ -10,6 +10,8 @@ import com.salon.ht.entity.ServiceMap;
 import com.salon.ht.entity.payload.BookingRequest;
 import com.salon.ht.entity.payload.BookingResponse;
 import com.salon.ht.entity.payload.EmailResp;
+import com.salon.ht.entity.payload.UpdateBookingRequest;
+import com.salon.ht.entity.payload.UpdateBookingResponse;
 import com.salon.ht.exception.BadRequestException;
 import com.salon.ht.mapper.BookingResMapper;
 import com.salon.ht.mapper.ComboMapper;
@@ -89,11 +91,7 @@ public class BookingService extends AbstractService<Booking, Long> {
         return bookingRepository;
     }
 
-    public BookingResponse createOrUpdateBooking(UserDetailsImpl userDetails, BookingRequest request) {
-        if (request.getId() != null && !bookingRepository.existsById(request.getId())) {
-            throw new BadRequestException("Lịch đặt không tồn tại");
-        }
-
+    public BookingResponse createBooking(UserDetailsImpl userDetails, BookingRequest request) {
         LocalDateTime startTime = convertStringToLDT(request.getStartTime());
         List<ServiceDto> reqServiceDtos = new ArrayList<>();
         List<ServiceDto> serviceCalDtos = new ArrayList<>();
@@ -103,7 +101,6 @@ public class BookingService extends AbstractService<Booking, Long> {
             });
             serviceCalDtos.addAll(reqServiceDtos);
         }
-
         if (!CollectionUtils.isEmpty(request.getComboIds())) {
             List<Service> services = serviceRepository.findByComboIds(request.getComboIds());
             serviceCalDtos.addAll(serviceMapper.toDto(services));
@@ -113,15 +110,7 @@ public class BookingService extends AbstractService<Booking, Long> {
                 .stream().map(ServiceDto::getDuration).reduce(0L, Long::sum));
 
         Booking booking = new Booking();
-
-        if (request.getId() != null) {
-            booking = bookingRepository.getById(request.getId());
-            booking.setId(request.getId());
-            booking.setModifiedBy(userDetails.getName());
-            booking.setModifiedDate(LocalDateTime.now());
-        } else {
-            booking.setCode(generateNewBookingCode());
-        }
+        booking.setCode(generateNewBookingCode());
         booking.setUserId(userDetails.getId());
         booking.setTitle(String.format("%s %s", userDetails.getName(), DATE_TIME_FORMATTER.format(startTime)));
         booking.setChooseUserId(request.getChooseUserId());
@@ -146,7 +135,6 @@ public class BookingService extends AbstractService<Booking, Long> {
             });
         }
         serviceMapRepository.saveAll(serviceMaps);
-
         BookingResponse bookingResponse = bookingResMapper.toDto(booking);
         if (!CollectionUtils.isEmpty(reqServiceDtos)) {
             bookingResponse.setServiceDtos(reqServiceDtos);
@@ -156,6 +144,70 @@ public class BookingService extends AbstractService<Booking, Long> {
         }
         bookingResponse.setId(bookingId);
         return bookingResponse;
+    }
+
+    public UpdateBookingResponse updateBooking(UserDetailsImpl userDetails, UpdateBookingRequest request, Long bookingId) {
+//        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->{
+//            throw new BadRequestException("Yêu cầu không tồn tại!");
+//        });
+//
+//
+//
+//
+//
+//        LocalDateTime startTime = convertStringToLDT(request.getStartTime());
+//        List<ServiceDto> reqServiceDtos = new ArrayList<>();
+//        List<ServiceDto> serviceCalDtos = new ArrayList<>();
+//        if (!CollectionUtils.isEmpty(request.getServiceIds())) {
+//            request.getServiceIds().forEach(id -> {
+//                reqServiceDtos.add(serviceMapper.toDto(serviceRepository.getById(id)));
+//            });
+//            serviceCalDtos.addAll(reqServiceDtos);
+//        }
+//        if (!CollectionUtils.isEmpty(request.getComboIds())) {
+//            List<Service> services = serviceRepository.findByComboIds(request.getComboIds());
+//            serviceCalDtos.addAll(serviceMapper.toDto(services));
+//        }
+//
+//        LocalDateTime endTime = startTime.plusMinutes(serviceCalDtos
+//                .stream().map(ServiceDto::getDuration).reduce(0L, Long::sum));
+//
+//        Booking booking = new Booking();
+//        booking.setCode(generateNewBookingCode());
+//        booking.setUserId(userDetails.getId());
+//        booking.setTitle(String.format("%s %s", userDetails.getName(), DATE_TIME_FORMATTER.format(startTime)));
+//        booking.setChooseUserId(request.getChooseUserId());
+//        booking.setDescription(request.getDescription());
+//        booking.setStartTime(startTime);
+//        booking.setEndTime(endTime);
+//        booking.setBookingStatus(BookingStatus.NEW);
+//        booking.setTakePhoto(request.getTakePhoto());
+//        booking.setCreateBy(userDetails.getName());
+//        booking = bookingRepository.save(booking);
+//        Long bookingId = booking.getId();
+//
+//        List<ServiceMap> serviceMaps = new ArrayList<>();
+//        reqServiceDtos.forEach(service -> {
+//            ServiceMap serviceMap = new ServiceMap(bookingId, service.getId(), null, userDetails.getId(), Constant.SERVICE_MAP.BOOKING.name(), 1);
+//            serviceMaps.add(serviceMap);
+//        });
+//        if (!CollectionUtils.isEmpty(request.getComboIds())) {
+//            request.getComboIds().forEach(comboId -> {
+//                ServiceMap serviceMap = new ServiceMap(bookingId, null, comboId, userDetails.getId(), Constant.SERVICE_MAP.BOOKING_COMBO.name(), 1);
+//                serviceMaps.add(serviceMap);
+//            });
+//        }
+//        serviceMapRepository.saveAll(serviceMaps);
+//        BookingResponse bookingResponse = bookingResMapper.toDto(booking);
+//        if (!CollectionUtils.isEmpty(reqServiceDtos)) {
+//            bookingResponse.setServiceDtos(reqServiceDtos);
+//        }
+//        if (!CollectionUtils.isEmpty(request.getComboIds())) {
+//            bookingResponse.setComboDtos(comboMapper.toDto(comboRepository.findByIdIn(request.getComboIds())));
+//        }
+//        bookingResponse.setId(bookingId);
+//        return bookingResponse;
+        return null;
     }
 
     private String generateNewBookingCode() {
