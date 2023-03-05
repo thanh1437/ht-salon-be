@@ -16,4 +16,6 @@ public class UpdateStatusListRequest {
     @ApiModelProperty(value = "Trạng thái cần cập nhật", dataType = "Integer", required = true)
     @NotNull(message = "Hãy nhập trạng thái cần cập nhật")
     Integer status;
+
+    String photo;
 }

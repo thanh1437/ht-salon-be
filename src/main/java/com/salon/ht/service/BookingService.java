@@ -10,7 +10,6 @@ import com.salon.ht.entity.ServiceMap;
 import com.salon.ht.entity.payload.BookingRequest;
 import com.salon.ht.entity.payload.BookingResponse;
 import com.salon.ht.entity.payload.EmailResp;
-import com.salon.ht.entity.payload.UpdateBookingRequest;
 import com.salon.ht.entity.payload.UpdateBookingResponse;
 import com.salon.ht.exception.BadRequestException;
 import com.salon.ht.mapper.BookingResMapper;
@@ -30,11 +29,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -94,24 +93,28 @@ public class BookingService extends AbstractService<Booking, Long> {
     public BookingResponse createBooking(UserDetailsImpl userDetails, BookingRequest request) {
         LocalDateTime startTime = convertStringToLDT(request.getStartTime());
         List<ServiceDto> reqServiceDtos = new ArrayList<>();
-        List<ServiceDto> serviceCalDtos = new ArrayList<>();
+        LocalDateTime endTime = caculateEndTime(startTime, request);
         if (!CollectionUtils.isEmpty(request.getServiceIds())) {
             request.getServiceIds().forEach(id -> {
                 reqServiceDtos.add(serviceMapper.toDto(serviceRepository.getById(id)));
             });
-            serviceCalDtos.addAll(reqServiceDtos);
-        }
-        if (!CollectionUtils.isEmpty(request.getComboIds())) {
-            List<Service> services = serviceRepository.findByComboIds(request.getComboIds());
-            serviceCalDtos.addAll(serviceMapper.toDto(services));
         }
 
-        LocalDateTime endTime = startTime.plusMinutes(serviceCalDtos
-                .stream().map(ServiceDto::getDuration).reduce(0L, Long::sum));
-
-        Booking booking = new Booking();
-        booking.setCode(generateNewBookingCode());
-        booking.setUserId(userDetails.getId());
+        Booking booking;
+        if (request.getId() != null) {
+            booking = bookingRepository.findById(request.getId()).orElseThrow(() ->{
+                throw new BadRequestException("Yêu cầu không tồn tại!");
+            });
+            booking.setModifiedBy(userDetails.getName());
+            booking.setModifiedDate(LocalDateTime.now());
+            serviceMapRepository.updateStatusByPkId(request.getId(), List.of(Constant.SERVICE_MAP.BOOKING_COMBO.name(),
+                    Constant.SERVICE_MAP.BOOKING.name()), 0);
+        } else {
+            booking = new Booking();
+            booking.setCode(generateNewBookingCode());
+            booking.setCreateBy(userDetails.getName());
+            booking.setUserId(userDetails.getId());
+        }
         booking.setTitle(String.format("%s %s", userDetails.getName(), DATE_TIME_FORMATTER.format(startTime)));
         booking.setChooseUserId(request.getChooseUserId());
         booking.setDescription(request.getDescription());
@@ -119,7 +122,6 @@ public class BookingService extends AbstractService<Booking, Long> {
         booking.setEndTime(endTime);
         booking.setBookingStatus(BookingStatus.NEW);
         booking.setTakePhoto(request.getTakePhoto());
-        booking.setCreateBy(userDetails.getName());
         booking = bookingRepository.save(booking);
         Long bookingId = booking.getId();
 
@@ -146,68 +148,22 @@ public class BookingService extends AbstractService<Booking, Long> {
         return bookingResponse;
     }
 
-    public UpdateBookingResponse updateBooking(UserDetailsImpl userDetails, UpdateBookingRequest request, Long bookingId) {
-//        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->{
-//            throw new BadRequestException("Yêu cầu không tồn tại!");
-//        });
-//
-//
-//
-//
-//
-//        LocalDateTime startTime = convertStringToLDT(request.getStartTime());
-//        List<ServiceDto> reqServiceDtos = new ArrayList<>();
-//        List<ServiceDto> serviceCalDtos = new ArrayList<>();
-//        if (!CollectionUtils.isEmpty(request.getServiceIds())) {
-//            request.getServiceIds().forEach(id -> {
-//                reqServiceDtos.add(serviceMapper.toDto(serviceRepository.getById(id)));
-//            });
-//            serviceCalDtos.addAll(reqServiceDtos);
-//        }
-//        if (!CollectionUtils.isEmpty(request.getComboIds())) {
-//            List<Service> services = serviceRepository.findByComboIds(request.getComboIds());
-//            serviceCalDtos.addAll(serviceMapper.toDto(services));
-//        }
-//
-//        LocalDateTime endTime = startTime.plusMinutes(serviceCalDtos
-//                .stream().map(ServiceDto::getDuration).reduce(0L, Long::sum));
-//
-//        Booking booking = new Booking();
-//        booking.setCode(generateNewBookingCode());
-//        booking.setUserId(userDetails.getId());
-//        booking.setTitle(String.format("%s %s", userDetails.getName(), DATE_TIME_FORMATTER.format(startTime)));
-//        booking.setChooseUserId(request.getChooseUserId());
-//        booking.setDescription(request.getDescription());
-//        booking.setStartTime(startTime);
-//        booking.setEndTime(endTime);
-//        booking.setBookingStatus(BookingStatus.NEW);
-//        booking.setTakePhoto(request.getTakePhoto());
-//        booking.setCreateBy(userDetails.getName());
-//        booking = bookingRepository.save(booking);
-//        Long bookingId = booking.getId();
-//
-//        List<ServiceMap> serviceMaps = new ArrayList<>();
-//        reqServiceDtos.forEach(service -> {
-//            ServiceMap serviceMap = new ServiceMap(bookingId, service.getId(), null, userDetails.getId(), Constant.SERVICE_MAP.BOOKING.name(), 1);
-//            serviceMaps.add(serviceMap);
-//        });
-//        if (!CollectionUtils.isEmpty(request.getComboIds())) {
-//            request.getComboIds().forEach(comboId -> {
-//                ServiceMap serviceMap = new ServiceMap(bookingId, null, comboId, userDetails.getId(), Constant.SERVICE_MAP.BOOKING_COMBO.name(), 1);
-//                serviceMaps.add(serviceMap);
-//            });
-//        }
-//        serviceMapRepository.saveAll(serviceMaps);
-//        BookingResponse bookingResponse = bookingResMapper.toDto(booking);
-//        if (!CollectionUtils.isEmpty(reqServiceDtos)) {
-//            bookingResponse.setServiceDtos(reqServiceDtos);
-//        }
-//        if (!CollectionUtils.isEmpty(request.getComboIds())) {
-//            bookingResponse.setComboDtos(comboMapper.toDto(comboRepository.findByIdIn(request.getComboIds())));
-//        }
-//        bookingResponse.setId(bookingId);
-//        return bookingResponse;
-        return null;
+    private LocalDateTime caculateEndTime(LocalDateTime startTime, BookingRequest request) {
+        List<ServiceDto> reqServiceDtos = new ArrayList<>();
+        List<ServiceDto> serviceCalDtos = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(request.getServiceIds())) {
+            request.getServiceIds().forEach(id -> {
+                reqServiceDtos.add(serviceMapper.toDto(serviceRepository.getById(id)));
+            });
+            serviceCalDtos.addAll(reqServiceDtos);
+        }
+        if (!CollectionUtils.isEmpty(request.getComboIds())) {
+            List<Service> services = serviceRepository.findByComboIds(request.getComboIds());
+            serviceCalDtos.addAll(serviceMapper.toDto(services));
+        }
+
+        return startTime.plusMinutes(serviceCalDtos
+                .stream().map(ServiceDto::getDuration).reduce(0L, Long::sum));
     }
 
     private String generateNewBookingCode() {

@@ -4,7 +4,6 @@ import com.salon.ht.annotation.CurrentUser;
 import com.salon.ht.entity.payload.ApiResponse;
 import com.salon.ht.entity.payload.BookingRequest;
 import com.salon.ht.entity.payload.BookingResponse;
-import com.salon.ht.entity.payload.UpdateBookingRequest;
 import com.salon.ht.entity.payload.UpdateBookingResponse;
 import com.salon.ht.entity.payload.UpdateStatusListRequest;
 import com.salon.ht.entity.payload.WorkingTimeInformationRequest;
@@ -50,16 +49,6 @@ public class BookingController {
         return ResponseEntity.ok(bookingResponse);
     }
 
-    @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','USER','EMPLOYEE')")
-    @ApiOperation(value = "Cập nhật yêu cầu")
-    public ResponseEntity<?> updateBooking(@PathVariable("id") Long id, @CurrentUser UserDetailsImpl userDetails,
-                                           @Valid @RequestBody UpdateBookingRequest bookingRequest) {
-        UpdateBookingResponse updateBookingResponse = bookingService.updateBooking(userDetails, bookingRequest, id);
-        LOGGER.info("Booking successfully with booking request {}", bookingRequest);
-        return ResponseEntity.ok(updateBookingResponse);
-    }
-
     @ApiOperation(value = "Cập nhật trạng thái các yêu cầu đặt lịch")
     @PreAuthorize("hasAnyRole('ADMIN')")
     @PutMapping("/update-booking-status-list")
@@ -70,7 +59,7 @@ public class BookingController {
 
     @ApiOperation(value = "Hoàn thành lịch đặt")
     @PreAuthorize("hasAnyRole('ADMIN')")
-    @PostMapping("/complete-booking/{id}")
+    @PutMapping("/complete-booking/{id}")
     public ResponseEntity<?> completeBooking(@PathVariable("id") Long id, String photo) {
         bookingService.completeBooking(id, photo);
         return ResponseEntity.ok(new ApiResponse(true, "Hoàn thành lịch cắt thành công!"));

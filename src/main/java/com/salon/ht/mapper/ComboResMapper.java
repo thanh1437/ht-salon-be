@@ -1,6 +1,5 @@
 package com.salon.ht.mapper;
 
-import com.salon.ht.dto.ComboDto;
 import com.salon.ht.entity.Combo;
 import com.salon.ht.entity.payload.ComboResponse;
 import org.mapstruct.Mapper;

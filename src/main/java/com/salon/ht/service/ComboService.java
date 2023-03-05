@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -90,7 +91,7 @@ public class ComboService {
 
         if (CollectionUtils.isEmpty(currentCmsIds) || !reqServiceIds.containsAll(currentCmsIds) || !currentCmsIds.containsAll(reqServiceIds)
                 || reqServiceIds.size() != currentCmsIds.size()) {
-            serviceMapRepository.updateStatusByPkId(comboId, Constant.SERVICE_MAP.COMBO.name(), 0);
+            serviceMapRepository.updateStatusByPkId(comboId, List.of(Constant.SERVICE_MAP.COMBO.name()), 0);
             List<ServiceMap> serviceMapList = new ArrayList<>();
             reqServiceIds.forEach(serviceId -> {
                 ServiceMap serviceMap = new ServiceMap(comboId, serviceId, comboId, userDetails.getId(), Constant.SERVICE_MAP.COMBO.name(), 1);

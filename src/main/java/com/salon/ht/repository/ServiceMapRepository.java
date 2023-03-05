@@ -16,9 +16,9 @@ public interface ServiceMapRepository extends JpaRepository<ServiceMap, Long> {
     List<Long> findServiceIdsByPkId(Long pkId);
 
     @Modifying(clearAutomatically = true)
-    @Query(value = "UPDATE service_map sl set sl.status= :status WHERE sl.pk_id= :pkId AND sl.table_name = :tableName", nativeQuery = true)
+    @Query(value = "UPDATE service_map sl set sl.status= :status WHERE sl.pk_id= :pkId AND sl.table_name IN :tableNames", nativeQuery = true)
     @Transactional
-    void updateStatusByPkId(Long pkId, String tableName, int status);
+    void updateStatusByPkId(Long pkId, List<String> tableNames, int status);
 
     @Modifying(clearAutomatically = true)
     @Query(value = "UPDATE service_map sl set sl.status= :status WHERE sl.pk_id IN :pkIds AND sl.table_name = :tableName", nativeQuery = true)
