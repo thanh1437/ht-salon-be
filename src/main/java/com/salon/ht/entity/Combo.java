@@ -32,6 +32,9 @@ public class Combo extends AbstractModel<Long> {
     @Column (name = "image")
     private String image;
 
+    @Column (name = "order_by")
+    private  Integer orderBy;
+
     @Column (name = "status")
     private  Integer status;
 

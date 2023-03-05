@@ -8,6 +8,7 @@ import com.salon.ht.entity.Combo;
 import com.salon.ht.entity.ServiceMap;
 import com.salon.ht.entity.payload.ComboRequest;
 import com.salon.ht.entity.payload.ComboResponse;
+import com.salon.ht.entity.payload.ServiceResponse;
 import com.salon.ht.exception.BadRequestException;
 import com.salon.ht.mapper.ComboResMapper;
 import com.salon.ht.mapper.ServiceMapper;
@@ -27,6 +28,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -76,12 +78,13 @@ public class ComboService {
             currentCmsIds = serviceMapRepository.findServiceIdsByPkId(comboDto.getId());
         } else {
             combo.setCode(generateNewComboCode());
+            combo.setCreateBy(userDetails.getName());
         }
         combo.setImage(comboDto.getImage());
         combo.setName(comboDto.getName());
         combo.setPrice(comboDto.getPrice());
         combo.setStatus(comboDto.getStatus());
-        combo.setCreateBy(userDetails.getName());
+        combo.setOrderBy(comboDto.getOrderBy());
         combo = comboRepository.save(combo);
         Long comboId = combo.getId();
 
@@ -136,7 +139,10 @@ public class ComboService {
             comboResponse.setId(combo.getId());
             comboResponses.add(comboResponse);
         }
-        comboResponses.sort(Comparator.comparing(ComboResponse::getStatus));
+        Comparator<ComboResponse> comparator = Comparator
+                .comparing(ComboResponse::getStatus, Comparator.reverseOrder())
+                .thenComparing(ComboResponse::getOrderBy);
+        Collections.sort(comboResponses, comparator);
         return new PageDto<>(comboPage, comboResponses);
     }
 }

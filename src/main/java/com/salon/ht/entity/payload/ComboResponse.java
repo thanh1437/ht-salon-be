@@ -21,6 +21,8 @@ public class ComboResponse implements Serializable {
 
     private Integer status;
 
+    private Integer orderBy;
+
     private String createBy;
 
     private String modifiedBy;

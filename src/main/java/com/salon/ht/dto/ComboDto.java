@@ -25,4 +25,6 @@ public class ComboDto implements Serializable {
     private String modifiedDate;
 
     private String image;
+
+    private Integer orderBy;
 }

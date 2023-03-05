@@ -32,4 +32,8 @@ public class ComboRequest {
     @NotNull(message = "Hãy chọn ảnh")
     private String image;
 
+    @ApiModelProperty(value = "Độ ưu tiên", dataType = "Integer", required = true)
+    @NotNull(message = "Hãy chọn độ ưu tiên")
+    private Integer orderBy;
+
 }
