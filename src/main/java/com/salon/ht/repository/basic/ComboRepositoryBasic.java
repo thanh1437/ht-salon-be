@@ -10,8 +10,5 @@ import org.springframework.stereotype.Repository;
 public interface ComboRepositoryBasic {
     Page<Combo> getCombos(@Param("name") String name,
                           @Param("code") String code,
-                          @Param("fromDate") String fromDate,
-                          @Param("toDate") String toDate,
-                          @Param("status") Integer status,
                           PageRequest pageRequest);
 }

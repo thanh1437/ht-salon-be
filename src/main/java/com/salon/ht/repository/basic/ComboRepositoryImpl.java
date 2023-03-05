@@ -14,7 +14,7 @@ import java.util.Map;
 @Repository
 public class ComboRepositoryImpl extends EntityRepository implements ComboRepositoryBasic {
     @Override
-    public Page<Combo> getCombos(String name, String code, String fromDate, String toDate, Integer status, PageRequest pageRequest) {
+    public Page<Combo> getCombos(String name, String code, PageRequest pageRequest) {
         String sqlWhere = "";
         Map<String, Object> params = new HashMap<>();
         if (name != null) {
@@ -25,17 +25,6 @@ public class ComboRepositoryImpl extends EntityRepository implements ComboReposi
         if (code != null) {
             sqlWhere += " AND b.code = :code";
             params.put("code", code);
-        }
-
-        if (fromDate != null && !"".equalsIgnoreCase(fromDate) && toDate != null && !"".equalsIgnoreCase(toDate)) {
-            sqlWhere += " AND b.created_date between STR_TO_DATE(:fromDate, '%d/%m/%Y') AND STR_TO_DATE(:toDate, '%d/%m/%Y') ";
-            params.put("fromDate", fromDate);
-            params.put("toDate", toDate);
-        }
-
-        if (status != null) {
-            sqlWhere += " AND b.status= :status";
-            params.put("status", status);
         }
 
         String sqlQuery = "SELECT * FROM combo b WHERE 1=1 " + sqlWhere;

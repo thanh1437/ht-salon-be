@@ -47,27 +47,16 @@ public class ComboController {
         return ResponseEntity.ok(bookingResponse);
     }
 
-    @ApiOperation(value = "Cập nhật trạng thái các combo")
-    @PreAuthorize("hasAnyRole('ADMIN')")
-    @PutMapping("/update-combo-status-list")
-    public ResponseEntity<?> updateComboStatusList(@RequestBody UpdateStatusListRequest updateStatusListRequest) {
-        comboService.updateComboStatusList(updateStatusListRequest.getIds(), updateStatusListRequest.getStatus());
-        return ResponseEntity.ok(new ApiResponse(true, "Cập nhật trạng thái các combo thành công!"));
-    }
-
     @GetMapping("/search")
     @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @ApiOperation(value = "Tìm kiếm combo")
     public ResponseEntity<?> getCombos(
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "code", required = false) String code,
-            @RequestParam(value = "fromDate", required = false) String fromDate,
-            @RequestParam(value = "toDate", required = false) String toDate,
-            @RequestParam(value = "status", required = false) Integer status,
             @RequestParam(value = "page", required = false) Integer page,
             @RequestParam(value = "pageSize", required = false) Integer pageSize
     ) {
-        return ResponseEntity.ok(comboService.getCombos(name, code, fromDate, toDate, status, page, pageSize));
+        return ResponseEntity.ok(comboService.getCombos(name, code, page, pageSize));
     }
 
 }

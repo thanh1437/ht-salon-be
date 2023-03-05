@@ -120,14 +120,14 @@ public class ComboService {
         }
     }
 
-    public PageDto<ComboResponse> getCombos(String name, String code, String fromDate, String toDate, Integer status, Integer page, Integer pageSize) {
+    public PageDto<ComboResponse> getCombos(String name, String code, Integer page, Integer pageSize) {
         PageRequest pageRequest;
         if (page == null || pageSize == null) {
             pageRequest = PageRequest.of(0, Integer.MAX_VALUE, Sort.Direction.ASC, "status");
         } else {
             pageRequest = PageRequest.of(page - 1, pageSize, Sort.Direction.ASC, "status");
         }
-        Page<Combo> bookings = comboRepositoryImpl.getCombos(name, code, fromDate, toDate, status, pageRequest);
+        Page<Combo> bookings = comboRepositoryImpl.getCombos(name, code, pageRequest);
         return setPageDto(bookings);
     }
 
