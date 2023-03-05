@@ -23,7 +23,6 @@ public class BookingRequest implements Serializable {
     @NotNull(message = "Hãy nhập thời gian bắt đầu")
     private String startTime;
 
-
     @ApiModelProperty(value = "Yêu cầu thêm (nếu có)", dataType = "String")
     private String description;
 

@@ -1,5 +1,6 @@
 package com.salon.ht.entity.payload;
 
+import com.salon.ht.validation.annotation.NullOrNotBlank;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -25,7 +26,7 @@ public class ComboRequest {
     private Integer status;
 
     @ApiModelProperty(value = "Các dịch vụ", required = true)
-    @NotNull(message = "Hãy chọn dịch vụ")
+    @NullOrNotBlank(message = "Hãy chọn dịch vụ")
     private List<Long> serviceIds;
 
     @ApiModelProperty(value = "Ảnh", dataType = "String", required = true)

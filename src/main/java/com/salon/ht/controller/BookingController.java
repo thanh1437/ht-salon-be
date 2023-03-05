@@ -69,8 +69,6 @@ public class BookingController {
     @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @ApiOperation(value = "Tìm kiếm đặt lịch")
     public ResponseEntity<?> getBookings(
-            @RequestParam(value = "title", required = false) String title,
-            @RequestParam(value = "code", required = false) String code,
             @RequestParam(value = "fromDate", required = false) String fromDate,
             @RequestParam(value = "toDate", required = false) String toDate,
             @RequestParam(value = "status", required = false) Integer status,
@@ -79,7 +77,7 @@ public class BookingController {
             @RequestParam(value = "chooseUserId", required = false) Long chooseUserId,
             @RequestParam(value = "userId", required = false) Long userId
     ) {
-        return ResponseEntity.ok(bookingService.getBookings(title, code, chooseUserId, userId, fromDate, toDate, status, page, pageSize));
+        return ResponseEntity.ok(bookingService.getBookings(chooseUserId, userId, fromDate, toDate, status, page, pageSize));
     }
 
     @PostMapping("/get-working-time-information")

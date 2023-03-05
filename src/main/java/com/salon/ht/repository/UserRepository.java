@@ -47,4 +47,5 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     @Query(value = "SELECT u FROM UserEntity u LEFT JOIN Booking b ON u.id = b.userId WHERE b.userId in :bookingIds")
     List<UserEntity> getByBookingIds(List<Long> bookingIds);
 
+    Optional<UserEntity> findTopByOrderByIdDesc();
 }

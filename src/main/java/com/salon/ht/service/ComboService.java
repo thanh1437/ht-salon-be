@@ -59,41 +59,35 @@ public class ComboService {
     }
 
 
-    public ComboResponse createOrUpdateBooking(UserDetailsImpl userDetails, ComboRequest comboDto) {
-        if (CollectionUtils.isEmpty(comboDto.getServiceIds())) {
-            throw new BadRequestException("Danh sách dịch vụ không được bỏ trống");
-        }
+    public ComboResponse createOrUpdateBooking(UserDetailsImpl userDetails, ComboRequest comboRequest) {
+        List<ServiceDto> reqServiceDtos = serviceMapper.toDto(serviceRepository.findByIdIn(comboRequest.getServiceIds()));
 
-        List<ServiceDto> reqServiceDtos = new ArrayList<>();
-        comboDto.getServiceIds().forEach(id -> {
-            reqServiceDtos.add(serviceMapper.toDto(serviceRepository.getById(id)));
-        });
-        List<Long> reqServiceIds = comboDto.getServiceIds();
-        List<Long> currentCmsIds = new ArrayList<>();
-        Combo combo = new Combo();
-        if (comboDto.getId() != null) {
-            combo = comboRepository.getById(comboDto.getId());
-            combo.setId(comboDto.getId());
+        Combo combo;
+        if (comboRequest.getId() != null) {
+            combo = comboRepository.findById(comboRequest.getId()).orElseThrow(() ->{
+                throw new BadRequestException("Combo không tồn tại!");
+            });
+            combo.setId(comboRequest.getId());
             combo.setModifiedBy(userDetails.getName());
             combo.setModifiedDate(LocalDateTime.now());
-            currentCmsIds = serviceMapRepository.findServiceIdsByPkId(comboDto.getId());
         } else {
+            combo = new Combo();
             combo.setCode(generateNewComboCode());
             combo.setCreateBy(userDetails.getName());
         }
-        combo.setImage(comboDto.getImage());
-        combo.setName(comboDto.getName());
-        combo.setPrice(comboDto.getPrice());
-        combo.setStatus(comboDto.getStatus());
-        combo.setOrderBy(comboDto.getOrderBy());
+        combo.setImage(comboRequest.getImage());
+        combo.setName(comboRequest.getName());
+        combo.setPrice(comboRequest.getPrice());
+        combo.setStatus(comboRequest.getStatus());
+        combo.setOrderBy(comboRequest.getOrderBy());
         combo = comboRepository.save(combo);
         Long comboId = combo.getId();
 
-        if (CollectionUtils.isEmpty(currentCmsIds) || !reqServiceIds.containsAll(currentCmsIds) || !currentCmsIds.containsAll(reqServiceIds)
-                || reqServiceIds.size() != currentCmsIds.size()) {
-            serviceMapRepository.updateStatusByPkId(comboId, List.of(Constant.SERVICE_MAP.COMBO.name()), 0);
+        if (comboRequest.getId() != null && !comboRequest.getServiceIds().equals(serviceMapRepository.findServiceIdsByPkId(comboRequest.getId(), Constant.SERVICE_MAP.COMBO.name()))) {
+            serviceMapRepository.updateStatusByPkId(comboRequest.getId(), List.of(Constant.SERVICE_MAP.COMBO.name()), 0);
+        } else {
             List<ServiceMap> serviceMapList = new ArrayList<>();
-            reqServiceIds.forEach(serviceId -> {
+            comboRequest.getServiceIds().forEach(serviceId -> {
                 ServiceMap serviceMap = new ServiceMap(comboId, serviceId, comboId, userDetails.getId(), Constant.SERVICE_MAP.COMBO.name(), 1);
                 serviceMapList.add(serviceMap);
             });

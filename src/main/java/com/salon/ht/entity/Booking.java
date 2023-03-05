@@ -63,6 +63,5 @@ public class Booking extends AbstractModel<Long> {
     private LocalDateTime modifiedDate;
 
     @Column(name = "status")
-    @Enumerated(value = EnumType.ORDINAL)
-    private BookingStatus bookingStatus;
+    private Integer status;
 }

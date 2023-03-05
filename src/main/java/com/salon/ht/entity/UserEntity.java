@@ -25,6 +25,8 @@ public class UserEntity extends AbstractModel<Long> {
 
     @Column(name = "name")
     private String name;
+    @Column(name = "code")
+    private String code;
     @Column(name = "username")
     private String username;
     @Column(name = "password")
@@ -66,6 +68,7 @@ public class UserEntity extends AbstractModel<Long> {
     public UserEntity(UserEntity userEntity) {
         setId(userEntity.getId());
         setUsername(userEntity.getUsername());
+        setCode(userEntity.getCode());
         setPassword(userEntity.getPassword());
         setName(userEntity.getName());
         setEmail(userEntity.getEmail());
@@ -74,7 +77,7 @@ public class UserEntity extends AbstractModel<Long> {
         setRoles(userEntity.getRoles());
         setCreatedDate(userEntity.getCreatedDate());
         setModifiedDate(userEntity.getModifiedDate());
-        setPhoto(userEntity.photo);
+        setPhoto(userEntity.getPhoto());
     }
 
     public UserEntity getUserEntity() {

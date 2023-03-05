@@ -8,6 +8,7 @@ import com.salon.ht.dto.RoleDto;
 import com.salon.ht.dto.UserDeptDto;
 import com.salon.ht.dto.UserDto;
 import com.salon.ht.dto.UserRoleDto;
+import com.salon.ht.entity.Booking;
 import com.salon.ht.entity.Department;
 import com.salon.ht.entity.Role;
 import com.salon.ht.entity.UserDepartment;
@@ -169,6 +170,7 @@ public class UserService extends AbstractService<UserEntity, Long> {
             }
             UserEntity user = new UserEntity();
             user.setUsername(userRequest.getUsername());
+            user.setCode(generateNewUserCode());
             user.setEmail(userRequest.getEmail());
             user.setName(userRequest.getName());
             user.setMobile(userRequest.getMobile());
@@ -184,6 +186,16 @@ public class UserService extends AbstractService<UserEntity, Long> {
         } catch (Exception e) {
             throw new UserRegistrationException(userRequest.getUsername(), e.getMessage());
         }
+    }
+
+    private String generateNewUserCode() {
+        Optional<UserEntity> nearestUser = userRepository.findTopByOrderByIdDesc();
+        if (nearestUser.isEmpty()) {
+            return String.format("%s%04d", "U", 1);
+        }
+        String lastCode = nearestUser.get().getCode();
+        int newCode = Integer.parseInt(lastCode.substring(1)) + 1;
+        return String.format("%s%04d", "U", newCode);
     }
 
     public void deleteUser(Long userId) {

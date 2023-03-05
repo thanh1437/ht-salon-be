@@ -12,8 +12,8 @@ import java.util.List;
 @Repository
 public interface ServiceMapRepository extends JpaRepository<ServiceMap, Long> {
 
-    @Query(value = "SELECT s.service_id FROM service_map s WHERE s.pk_id = :pkId AND s.status = 1", nativeQuery = true)
-    List<Long> findServiceIdsByPkId(Long pkId);
+    @Query(value = "SELECT s.service_id FROM service_map s WHERE s.pk_id = :pkId AND s.status = 1 AND s.table_name = :tableName", nativeQuery = true)
+    List<Long> findServiceIdsByPkId(Long pkId, String tableName);
 
     @Modifying(clearAutomatically = true)
     @Query(value = "UPDATE service_map sl set sl.status= :status WHERE sl.pk_id= :pkId AND sl.table_name IN :tableNames", nativeQuery = true)

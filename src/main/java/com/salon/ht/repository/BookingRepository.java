@@ -26,6 +26,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     Optional<Booking> findTopByOrderByIdDesc();
 
     @Query(value = "SELECT * FROM `booking` b WHERE b.choose_user_id = :userId " +
-            "AND DATE(b.start_time) = STR_TO_DATE(:date, '%d/%m/%Y') ORDER BY b.start_time ", nativeQuery = true)
+            "AND DATE(b.start_time) = STR_TO_DATE(:date, '%d/%m/%Y') ORDER BY b.start_time AND b.status <> 3 ", nativeQuery = true)
     List<Booking> findByUserChooseIds(Long userId, String date);
 }

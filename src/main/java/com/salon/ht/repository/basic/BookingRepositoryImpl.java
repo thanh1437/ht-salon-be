@@ -30,19 +30,10 @@ public class BookingRepositoryImpl extends EntityRepository implements BookingRe
     }
 
     @Override
-    public Page<Booking> getBooking(String title, String code, Long chooseUserId, Long userId,
+    public Page<Booking> getBooking(Long chooseUserId, Long userId,
                                     String fromDate, String toDate, Integer status, PageRequest pageRequest) {
         String sqlWhere = "";
         Map<String, Object> params = new HashMap<>();
-        if (title != null) {
-            sqlWhere += " AND b.title LIKE :title";
-            params.put("title", "%" + title + "%");
-        }
-
-        if (code != null) {
-            sqlWhere += " AND b.code = :code";
-            params.put("code", code);
-        }
 
         if (chooseUserId != null) {
             sqlWhere += " AND b.choose_user_id = :chooseUserId";

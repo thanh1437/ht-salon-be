@@ -3,6 +3,7 @@ package com.salon.ht.entity.payload;
 import com.salon.ht.constant.BookingStatus;
 import com.salon.ht.dto.ComboDto;
 import com.salon.ht.dto.ServiceDto;
+import com.salon.ht.dto.UserDto;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -19,7 +20,7 @@ public class BookingResponse implements Serializable {
 
     private String userName;
 
-    private Long chooseUserId;
+    private String chooseUser;
 
     private String startTime;
 
@@ -29,7 +30,7 @@ public class BookingResponse implements Serializable {
 
     private Integer takePhoto;
 
-    private BookingStatus bookingStatus;
+    private Integer status;
 
     private String createBy;
 
