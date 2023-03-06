@@ -223,14 +223,14 @@ public class BookingService extends AbstractService<Booking, Long> {
         bookingRepository.save(booking);
     }
 
-    public PageDto<BookingResponse> getBookings(Long chooseUserId, Long userId, String fromDate, String toDate, Integer status, Integer page, Integer pageSize) {
+    public PageDto<BookingResponse> getBookings(Long chooseUserId, String name, String fromDate, String toDate, Integer status, Integer page, Integer pageSize) {
         PageRequest pageRequest;
         if (page == null || pageSize == null) {
             pageRequest = PageRequest.of(0, Integer.MAX_VALUE);
         } else {
             pageRequest = PageRequest.of(page - 1, pageSize);
         }
-        Page<Booking> bookings = bookingRepositoryImpl.getBooking(chooseUserId, userId, fromDate, toDate, status, pageRequest);
+        Page<Booking> bookings = bookingRepositoryImpl.getBooking(chooseUserId, name, fromDate, toDate, status, pageRequest);
         return setPageDto(bookings);
     }
 

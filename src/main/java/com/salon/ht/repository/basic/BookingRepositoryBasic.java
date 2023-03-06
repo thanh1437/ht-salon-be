@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BookingRepositoryBasic {
     Page<Booking> getBooking(@Param("chooseUserId") Long chooseUserId,
-                             @Param("userId") Long userId,
+                             @Param("name") String name,
                              @Param("fromDate") String fromDate,
                              @Param("toDate") String toDate,
                              @Param("status") Integer status,

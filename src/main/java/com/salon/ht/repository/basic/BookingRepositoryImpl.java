@@ -30,7 +30,7 @@ public class BookingRepositoryImpl extends EntityRepository implements BookingRe
     }
 
     @Override
-    public Page<Booking> getBooking(Long chooseUserId, Long userId,
+    public Page<Booking> getBooking(Long chooseUserId, String name,
                                     String fromDate, String toDate, Integer status, PageRequest pageRequest) {
         String sqlWhere = "";
         Map<String, Object> params = new HashMap<>();
@@ -38,11 +38,6 @@ public class BookingRepositoryImpl extends EntityRepository implements BookingRe
         if (chooseUserId != null) {
             sqlWhere += " AND b.choose_user_id = :chooseUserId";
             params.put("chooseUserId", chooseUserId);
-        }
-
-        if (userId != null) {
-            sqlWhere += " AND b.user_id= :userId";
-            params.put("userId", userId);
         }
 
         if (fromDate != null && !"".equalsIgnoreCase(fromDate) && toDate != null && !"".equalsIgnoreCase(toDate)) {
@@ -54,6 +49,11 @@ public class BookingRepositoryImpl extends EntityRepository implements BookingRe
         if (status != null) {
             sqlWhere += " AND b.status= :status";
             params.put("status", status);
+        }
+
+        if (name != null) {
+            sqlWhere += " AND (LOWER(b.create_by) LIKE LOWER(:name) OR LOWER(b.code) LIKE LOWER(:name)) ";
+            params.put("name", "%" + name + "%");
         }
 
         String sqlQuery = "SELECT * FROM booking b WHERE 1=1 " + sqlWhere;

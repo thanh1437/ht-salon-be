@@ -75,9 +75,9 @@ public class BookingController {
             @RequestParam(value = "page", required = false) Integer page,
             @RequestParam(value = "pageSize", required = false) Integer pageSize,
             @RequestParam(value = "chooseUserId", required = false) Long chooseUserId,
-            @RequestParam(value = "userId", required = false) Long userId
+            @RequestParam(value = "name", required = false) String name
     ) {
-        return ResponseEntity.ok(bookingService.getBookings(chooseUserId, userId, fromDate, toDate, status, page, pageSize));
+        return ResponseEntity.ok(bookingService.getBookings(chooseUserId, name, fromDate, toDate, status, page, pageSize));
     }
 
     @PostMapping("/get-working-time-information")
