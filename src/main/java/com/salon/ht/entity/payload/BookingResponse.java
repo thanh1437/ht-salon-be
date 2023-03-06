@@ -40,6 +40,8 @@ public class BookingResponse implements Serializable {
 
     private String modifiedDate;
 
+    private String photo;
+
     private List<ServiceDto> serviceDtos;
 
     private List<ComboDto> comboDtos;

@@ -4,6 +4,7 @@ import com.salon.ht.annotation.CurrentUser;
 import com.salon.ht.entity.payload.ApiResponse;
 import com.salon.ht.entity.payload.BookingRequest;
 import com.salon.ht.entity.payload.BookingResponse;
+import com.salon.ht.entity.payload.CompleteBookingReq;
 import com.salon.ht.entity.payload.UpdateBookingResponse;
 import com.salon.ht.entity.payload.UpdateStatusListRequest;
 import com.salon.ht.entity.payload.WorkingTimeInformationRequest;
@@ -60,8 +61,8 @@ public class BookingController {
     @ApiOperation(value = "Hoàn thành lịch đặt")
     @PreAuthorize("hasAnyRole('ADMIN')")
     @PutMapping("/complete-booking/{id}")
-    public ResponseEntity<?> completeBooking(@PathVariable("id") Long id, String photo) {
-        bookingService.completeBooking(id, photo);
+    public ResponseEntity<?> completeBooking(@PathVariable("id") Long id,@RequestBody CompleteBookingReq completeBookingReq) {
+        bookingService.completeBooking(id, completeBookingReq.getPhoto());
         return ResponseEntity.ok(new ApiResponse(true, "Hoàn thành lịch cắt thành công!"));
     }
 
