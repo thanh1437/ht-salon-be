@@ -29,7 +29,7 @@ public class Combo extends AbstractModel<Long> {
     @Column (name = "price")
     private Long price;
 
-    @Column (name = "image")
+    @Column (name = "image", columnDefinition="LONGTEXT")
     private String image;
 
     @Column (name = "order_by")

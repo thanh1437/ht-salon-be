@@ -42,7 +42,7 @@ public class UserEntity extends AbstractModel<Long> {
     @Column(name = "status")
     @Enumerated
     private UserStatus status;
-    @Column(name = "photo", columnDefinition = "VARCHAR(255) DEFAULT '/resources/images/default.png'")
+    @Column(name = "photo", columnDefinition="LONGTEXT")
     private String photo;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})

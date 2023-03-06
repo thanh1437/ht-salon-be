@@ -47,7 +47,7 @@ public class Booking extends AbstractModel<Long> {
     @Column(name = "take_photo", nullable = false)
     private Integer takePhoto;
 
-    @Column (name = "photo")
+    @Column (name = "photo", columnDefinition="LONGTEXT")
     private String photo;
 
     @Column(name = "create_by", updatable = false)
