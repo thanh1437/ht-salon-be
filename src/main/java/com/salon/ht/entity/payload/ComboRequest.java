@@ -26,7 +26,7 @@ public class ComboRequest {
     private Integer status;
 
     @ApiModelProperty(value = "Các dịch vụ", required = true)
-    @NullOrNotBlank(message = "Hãy chọn dịch vụ")
+    @NotNull(message = "Hãy chọn dịch vụ")
     private List<Long> serviceIds;
 
     @ApiModelProperty(value = "Ảnh", dataType = "String", required = true)
