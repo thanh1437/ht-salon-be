@@ -227,7 +227,6 @@ public class UserService extends AbstractService<UserEntity, Long> {
             Optional<UserEntity> userEntityOptional = userRepository.findById(request.getId());
             if (userEntityOptional.isPresent()) {
                 UserEntity user = userEntityOptional.get();
-                user.setUsername(request.getUsername());
                 user.setName(request.getName());
                 user.setMobile(request.getMobile());
                 user.setEmail(request.getEmail());

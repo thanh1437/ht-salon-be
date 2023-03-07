@@ -20,8 +20,7 @@ public class RegistrationUserRequest implements Serializable {
     @NotNull(message = "Tên tài khoàn người dùng không được thiếu")
     private String username;
 
-    @ApiModelProperty(value = "Mật khẩu người dùng", dataType = "String", required = true)
-    @NotNull(message = "Mật khẩu người dùng không được thiếu")
+    @ApiModelProperty(value = "Mật khẩu người dùng", dataType = "String")
     private String password;
 
     @ApiModelProperty(value = "Họ và tên người dùng", dataType = "String", required = true)
