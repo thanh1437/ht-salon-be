@@ -42,7 +42,6 @@ public class ServiceController {
     }
 
     @GetMapping("/search")
-    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @ApiOperation(value = "Tìm kiếm dịch vụ")
     public ResponseEntity<?> getServices(
             @RequestParam(value = "name", required = false) String name,

@@ -30,6 +30,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtAuthenticationEntryPoint authenticationEntryPoint;
 
     private static final String[] AUTH_WHITELIST = {
+            //public API
+            "/api/service/search/**",
+            "/api/combo/search/**",
             // -- Swagger UI v2
             "/v2/api-docs",
             "/swagger-resources",

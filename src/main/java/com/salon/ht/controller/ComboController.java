@@ -48,7 +48,6 @@ public class ComboController {
     }
 
     @GetMapping("/search")
-    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @ApiOperation(value = "Tìm kiếm combo")
     public ResponseEntity<?> getCombos(
             @RequestParam(value = "name", required = false) String name,
