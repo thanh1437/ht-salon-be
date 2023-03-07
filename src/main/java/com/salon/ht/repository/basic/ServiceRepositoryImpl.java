@@ -1,5 +1,6 @@
 package com.salon.ht.repository.basic;
 
+import com.salon.ht.dto.ComboDto;
 import com.salon.ht.dto.ServiceDto;
 import com.salon.ht.entity.Service;
 import org.slf4j.Logger;
@@ -24,6 +25,15 @@ public class ServiceRepositoryImpl extends EntityRepository implements ServiceRe
         String jpql = "SELECT NEW com.salon.ht.dto.ServiceDto(s.id, s.name, s.code, s.orderBy, s.price, s.duration, s.status, sl.pkId) " +
                 "FROM ServiceMap sl LEFT JOIN Service s ON sl.serviceId = s.id WHERE sl.pkId IN :pkId AND sl.tableName = :tableName";
         TypedQuery<ServiceDto> query = entityManager.createQuery(jpql, ServiceDto.class);
+        query.setParameter("pkId", pkId);
+        query.setParameter("tableName", tableName);
+        return query.getResultList();
+    }
+
+    public List<ComboDto> getComboDtosByPkIdsAndTableName(List<Long> pkId, String tableName) {
+        String jpql = "SELECT NEW com.salon.ht.dto.ComboDto(s.id, s.name, s.price, s.status, s.image, s.orderBy, sl.pkId) " +
+                "FROM ServiceMap sl LEFT JOIN Combo s ON sl.comboId = s.id WHERE sl.pkId IN :pkId AND sl.tableName = :tableName";
+        TypedQuery<ComboDto> query = entityManager.createQuery(jpql, ComboDto.class);
         query.setParameter("pkId", pkId);
         query.setParameter("tableName", tableName);
         return query.getResultList();

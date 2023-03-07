@@ -1,6 +1,7 @@
 package com.salon.ht.service;
 
 import com.salon.ht.config.Constant;
+import com.salon.ht.dto.ComboDto;
 import com.salon.ht.dto.PageDto;
 import com.salon.ht.dto.ServiceDto;
 import com.salon.ht.entity.Booking;
@@ -96,7 +97,7 @@ public class BookingService extends AbstractService<Booking, Long> {
 
         Booking booking;
         if (request.getId() != null) {
-            booking = bookingRepository.findById(request.getId()).orElseThrow(() ->{
+            booking = bookingRepository.findById(request.getId()).orElseThrow(() -> {
                 throw new BadRequestException("Yêu cầu không tồn tại!");
             });
             booking.setModifiedBy(userDetails.getName());
@@ -255,10 +256,16 @@ public class BookingService extends AbstractService<Booking, Long> {
         List<BookingResponse> bookingResponses = new ArrayList<>();
         List<ServiceDto> serviceDtos = serviceRepositoryImpl.getServiceDtosByPkIdsAndTableName(bookings
                 .stream().map(Booking::getId).collect(Collectors.toList()), Constant.SERVICE_MAP.BOOKING.name());
+        List<ComboDto> comboDtos = serviceRepositoryImpl.getComboDtosByPkIdsAndTableName(bookings
+                .stream().map(Booking::getId).collect(Collectors.toList()), Constant.SERVICE_MAP.BOOKING_COMBO.name());
         for (Booking booking : bookings) {
             BookingResponse bookingResponse = bookingResMapper.toDto(booking);
             bookingResponse.setServiceDtos(serviceDtos.stream().filter(serviceDto -> serviceDto.getPkId()
                     .equals(booking.getId())).collect(Collectors.toList()));
+            bookingResponse.setComboDtos(comboDtos.stream().filter(serviceDto -> serviceDto.getPkId()
+                    .equals(booking.getId())).collect(Collectors.toList()));
+
+            bookingResponse.setTotalPrice(getTotalPrice(comboDtos.stream().map(ComboDto::getId).collect(Collectors.toList()), serviceDtos));
             UserEntity userEntity = userRepository.getById(booking.getChooseUserId());
             bookingResponse.setChooseUser(String.format("%s - %s", userEntity.getName(), userEntity.getCode()));
             bookingResponses.add(bookingResponse);
