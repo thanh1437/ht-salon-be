@@ -152,6 +152,7 @@ public class UserService extends AbstractService<UserEntity, Long> {
         newUser.setPassword(passwordEncoder.encode(request.getPassword()));
         newUser.setRoles(roles);
         newUser.setStatus(UserStatus.ACTIVE);
+        newUser.setPhoto(request.getPhoto());
         return newUser;
     }
 
@@ -221,7 +222,7 @@ public class UserService extends AbstractService<UserEntity, Long> {
         userRepository.updateStatus(userId, newStatus);
     }
 
-    public void updateUser(RegistrationUserRequest request, MultipartFile file) {
+    public void updateUser(RegistrationUserRequest request) {
         try {
             Optional<UserEntity> userEntityOptional = userRepository.findById(request.getId());
             if (userEntityOptional.isPresent()) {

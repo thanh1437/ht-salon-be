@@ -67,7 +67,6 @@ public class BookingController {
     }
 
     @GetMapping("/search")
-    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @ApiOperation(value = "Tìm kiếm đặt lịch")
     public ResponseEntity<?> getBookings(
             @CurrentUser UserDetailsImpl userDetails,

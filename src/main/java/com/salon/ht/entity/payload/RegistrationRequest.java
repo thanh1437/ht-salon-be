@@ -39,4 +39,9 @@ public class RegistrationRequest {
     @NotNull(message = "Name can't null")
     @ApiModelProperty(value = "A valid name string", required = true, allowableValues = "NonEmpty String")
     private String name;
+
+    @NotNull(message = "Photo can't null")
+    @ApiModelProperty(value = "A valid photo string", required = true, allowableValues = "NonEmpty String")
+    private String photo;
+
 }

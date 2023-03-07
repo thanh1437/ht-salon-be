@@ -129,8 +129,7 @@ public class UserController {
     @PostMapping("/update")
     @ApiOperation(value = "API để thay đổi thông tin của nhân viên")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> updateUser(@RequestPart(value = "photo", required = false) MultipartFile photo,
-                                        @Valid @RequestParam(value = "user", required = false) String user) {
+    public ResponseEntity<?> updateUser(@Valid @RequestParam(value = "user", required = false) String user) {
         LOGGER.info("update user request {}", user);
         RegistrationUserRequest request;
         try {
@@ -138,7 +137,7 @@ public class UserController {
         } catch (Exception e) {
             throw new BadRequestException("Không thể đọc được dữ liệu user truyền lên. Hãy xem lại các trường dữ liệu truyền lên");
         }
-        userService.updateUser(request, photo);
+        userService.updateUser(request);
         return ResponseEntity.ok(new ApiResponse(true, "Cập nhật thông tin nhân viên thành công!"));
     }
 
