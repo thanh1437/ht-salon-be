@@ -58,6 +58,7 @@ public class AuthController {
                 .orElseThrow(() -> new UserLoginException("Không thể đăng nhập với tài khoản: [" + loginRequest + "]"));
 
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        userDetails.setPhoto(null);
 
         LOGGER.info("Logged user return [API]: " + userDetails.getUsername());
 
