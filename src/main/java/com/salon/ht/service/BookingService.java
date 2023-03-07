@@ -4,6 +4,7 @@ import com.salon.ht.config.Constant;
 import com.salon.ht.dto.PageDto;
 import com.salon.ht.dto.ServiceDto;
 import com.salon.ht.entity.Booking;
+import com.salon.ht.entity.Combo;
 import com.salon.ht.entity.Service;
 import com.salon.ht.entity.ServiceMap;
 import com.salon.ht.entity.UserEntity;
@@ -91,6 +92,7 @@ public class BookingService extends AbstractService<Booking, Long> {
         LocalDateTime startTime = convertStringToLDT(request.getStartTime());
         LocalDateTime endTime = caculateEndTime(startTime, request);
         List<ServiceDto> reqServiceDtos = getServiceDtoFromBookingRequest(request);
+        Long totalPrice = getTotalPrice(request.getComboIds(), reqServiceDtos);
 
         Booking booking;
         if (request.getId() != null) {
@@ -127,9 +129,23 @@ public class BookingService extends AbstractService<Booking, Long> {
             bookingResponse.setComboDtos(comboMapper.toDto(comboRepository.findByIdIn(request.getComboIds())));
         }
         bookingResponse.setId(booking.getId());
+        bookingResponse.setTotalPrice(totalPrice);
         UserEntity userEntity = userRepository.getById(request.getChooseUserId());
         bookingResponse.setChooseUser(String.format("%s - %s", userEntity.getName(), userEntity.getCode()));
         return bookingResponse;
+    }
+
+    private Long getTotalPrice(List<Long> comboIds, List<ServiceDto> reqServiceDtos) {
+        Long totalPrice = 0L;
+
+        if (!CollectionUtils.isEmpty(reqServiceDtos)) {
+            totalPrice += reqServiceDtos
+                    .stream().map(ServiceDto::getPrice).reduce(0L, Long::sum);
+        }
+        if (!CollectionUtils.isEmpty(comboIds)) {
+            totalPrice += comboRepository.findByIdIn(comboIds).stream().map(Combo::getPrice).reduce(0L, Long::sum);
+        }
+        return totalPrice;
     }
 
     private void changeDataBooking(UserDetailsImpl userDetails, BookingRequest request, List<ServiceDto> reqServiceDtos) {
@@ -223,14 +239,14 @@ public class BookingService extends AbstractService<Booking, Long> {
         bookingRepository.save(booking);
     }
 
-    public PageDto<BookingResponse> getBookings(Long chooseUserId, String name, String fromDate, String toDate, Integer status, Integer page, Integer pageSize) {
+    public PageDto<BookingResponse> getBookings(UserDetailsImpl userDetails, Long chooseUserId, String name, String fromDate, String toDate, Integer status, Integer page, Integer pageSize) {
         PageRequest pageRequest;
         if (page == null || pageSize == null) {
             pageRequest = PageRequest.of(0, Integer.MAX_VALUE);
         } else {
             pageRequest = PageRequest.of(page - 1, pageSize);
         }
-        Page<Booking> bookings = bookingRepositoryImpl.getBooking(chooseUserId, name, fromDate, toDate, status, pageRequest);
+        Page<Booking> bookings = bookingRepositoryImpl.getBooking(userDetails, chooseUserId, name, fromDate, toDate, status, pageRequest);
         return setPageDto(bookings);
     }
 

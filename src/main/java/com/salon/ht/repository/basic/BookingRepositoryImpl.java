@@ -1,7 +1,9 @@
 package com.salon.ht.repository.basic;
 
+import com.salon.ht.config.Constant;
 import com.salon.ht.entity.Booking;
 import com.salon.ht.entity.payload.EmailResp;
+import com.salon.ht.security.service.UserDetailsImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -30,10 +32,18 @@ public class BookingRepositoryImpl extends EntityRepository implements BookingRe
     }
 
     @Override
-    public Page<Booking> getBooking(Long chooseUserId, String name,
+    public Page<Booking> getBooking(UserDetailsImpl userDetails, Long chooseUserId, String name,
                                     String fromDate, String toDate, Integer status, PageRequest pageRequest) {
+
+        boolean isAdmin = userDetails.getRoles().stream().anyMatch(role -> Constant.ROLES.ROLE_ADMIN.name().equals(role.getName()));
+
         String sqlWhere = "";
         Map<String, Object> params = new HashMap<>();
+
+        if (!isAdmin) {
+            sqlWhere += " AND (b.choose_user_id = :usId OR b.user_id = :usId)";
+            params.put("usId", userDetails.getId());
+        }
 
         if (chooseUserId != null) {
             sqlWhere += " AND b.choose_user_id = :chooseUserId";
