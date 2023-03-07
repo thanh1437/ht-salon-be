@@ -56,7 +56,6 @@ public class UserController {
 
     @GetMapping
     @ApiOperation(value = "APi lấy danh sách người dùng hệ thống")
-    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     public ResponseEntity<?> getUsers(@RequestParam(value = "name", required = false) String name,
                                       @RequestParam(value = "status", required = false) Integer status,
                                       @RequestParam(value = "email", required = false) String email,

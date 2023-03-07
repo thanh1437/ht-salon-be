@@ -33,7 +33,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             //public API
             "/api/service/search/**",
             "/api/combo/search/**",
-            "/api/users//get-users-role-employee",
+            "/api/users/get-users-role-employee",
             // -- Swagger UI v2
             "/v2/api-docs",
             "/swagger-resources",
