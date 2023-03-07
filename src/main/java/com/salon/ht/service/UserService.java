@@ -289,7 +289,7 @@ public class UserService extends AbstractService<UserEntity, Long> {
         userDto.setUsername(userEntity.getUsername());
         userDto.setEmail(userEntity.getEmail());
         userDto.setMobile(userEntity.getMobile());
-        userDto.setStatus(userEntity.getStatus());
+        userDto.setStatus(userEntity.getStatus().getValue());
         userDto.setCreatedDate(userEntity.getCreatedDate());
         userDto.setModifiedDate(userEntity.getModifiedDate());
         userDto.setName(userEntity.getName());

@@ -23,7 +23,7 @@ public class UserDto implements Serializable {
     private String email;
     private Date createdDate;
     private Date modifiedDate;
-    private UserStatus status;
+    private Integer status;
     List<RoleDto> roles;
     private String photo;
     private UserDeptDto dept;

@@ -65,8 +65,8 @@ public class UserController {
                                       @RequestParam(value = "page", required = false) Integer page,
                                       @RequestParam(value = "fromDate", required = false) String fromDate,
                                       @RequestParam(value = "toDate", required = false) String toDate,
-                                      @RequestParam(value = "limit", required = false) Integer limit) {
-        return new ResponseEntity<>(userService.getList(name, status, mobile, email, departmentId, fromDate, toDate, page, limit), HttpStatus.OK);
+                                      @RequestParam(value = "size", required = false) Integer size) {
+        return new ResponseEntity<>(userService.getList(name, status, mobile, email, departmentId, fromDate, toDate, page, size), HttpStatus.OK);
     }
 
     @PostMapping()
