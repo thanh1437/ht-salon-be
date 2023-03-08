@@ -27,9 +27,8 @@ public class RegistrationRequest {
     @ApiModelProperty(value = "A valid password string", required = true, allowableValues = "NonEmpty String")
     private String password;
 
-    @NotNull(message = "Specify whether the user has to be registered as an admin or not")
-    @ApiModelProperty(value = "Flag denoting whether the user is an admin or not", required = true,
-            dataType = "boolean", allowableValues = "true, false")
+    @NotNull(message = "Role is not empty")
+    @ApiModelProperty(value = "Flag denoting whether the user is an admin or not", required = true, dataType = "String")
     private String role;
 
     @NotNull(message = "Mobile can't null")
@@ -40,8 +39,7 @@ public class RegistrationRequest {
     @ApiModelProperty(value = "A valid name string", required = true, allowableValues = "NonEmpty String")
     private String name;
 
-    @NotNull(message = "Photo can't null")
-    @ApiModelProperty(value = "A valid photo string", required = true, allowableValues = "NonEmpty String")
+    @ApiModelProperty(value = "A valid photo string", allowableValues = "NonEmpty String")
     private String photo;
 
 }
