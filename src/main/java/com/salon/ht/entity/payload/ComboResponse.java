@@ -13,6 +13,8 @@ public class ComboResponse implements Serializable {
 
     private String name;
 
+    private String description;
+
     private String code;
 
     private Long price;

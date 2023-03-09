@@ -4,6 +4,7 @@ import com.salon.ht.validation.annotation.NullOrNotBlank;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.persistence.Column;
 import javax.validation.constraints.NotNull;
 
 @Data
@@ -14,6 +15,10 @@ public class ServiceRequest {
     @ApiModelProperty(value = "Tên dịch vụ", dataType = "String", required = true)
     @NullOrNotBlank(message = "Hãy chọn tên dịch vụ")
     private String name;
+
+    @ApiModelProperty(value = "Mô tả", dataType = "String", required = true)
+    @NullOrNotBlank(message = "Hãy chọn thêm mô tả")
+    private String description;
 
     @ApiModelProperty(value = "Độ ưu tiên dịch vụ", dataType = "Integer", required = true)
     @NotNull(message = "Hãy chọn độ ưu tiên cho dịch vụ")
@@ -34,5 +39,7 @@ public class ServiceRequest {
     @ApiModelProperty(value = "Ảnh dịch vụ", dataType = "String", required = true)
     @NullOrNotBlank(message = "Hãy chọn ảnh dịch vụ")
     private String image;
+
+
 
 }

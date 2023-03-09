@@ -11,7 +11,6 @@ import com.salon.ht.repository.basic.ServiceRepositoryImpl;
 import com.salon.ht.security.service.UserDetailsImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -43,6 +42,7 @@ public class ServiceService {
             service.setCreateBy(userDetails.getName());
             service.setCode(generateNewServiceCode());
         }
+        service.setDescription(serviceRequest.getDescription());
         service.setImage(serviceRequest.getImage());
         service.setName(serviceRequest.getName());
         service.setOrderBy(serviceRequest.getOrderBy());

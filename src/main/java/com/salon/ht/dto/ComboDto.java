@@ -12,6 +12,8 @@ public class ComboDto implements Serializable {
 
     private String name;
 
+    private String description;
+
     private Long price;
 
     private Integer status;

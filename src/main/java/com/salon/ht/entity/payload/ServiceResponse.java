@@ -1,6 +1,5 @@
 package com.salon.ht.entity.payload;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -11,6 +10,8 @@ public class ServiceResponse implements Serializable {
     private Long id;
 
     private String name;
+
+    private String description;
 
     private String code;
 

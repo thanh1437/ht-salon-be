@@ -17,6 +17,10 @@ public class ComboRequest {
     @NotNull(message = "Hãy chọn tên")
     private String name;
 
+    @ApiModelProperty(value = "Mô tả", dataType = "String", required = true)
+    @NullOrNotBlank(message = "Hãy chọn thêm mô tả")
+    private String description;
+
     @ApiModelProperty(value = "Giá combo", dataType = "Long", required = true)
     @NotNull(message = "Hãy chọn giá")
     private Long price;

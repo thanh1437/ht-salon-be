@@ -75,6 +75,7 @@ public class ComboService {
             combo.setCode(generateNewComboCode());
             combo.setCreateBy(userDetails.getName());
         }
+        combo.setDescription(comboRequest.getDescription());
         combo.setImage(comboRequest.getImage());
         combo.setName(comboRequest.getName());
         combo.setPrice(comboRequest.getPrice());

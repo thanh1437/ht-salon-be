@@ -18,6 +18,8 @@ public class ServiceDto implements Serializable {
 
     private String name;
 
+    private String description;
+
     private Integer type;
 
     private Long price;
