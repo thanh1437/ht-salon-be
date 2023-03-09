@@ -111,14 +111,14 @@ public class ComboService {
         return String.format("%s%04d", "C", newCode);
     }
 
-    public PageDto<ComboResponse> getCombos(String name, Integer page, Integer pageSize) {
+    public PageDto<ComboResponse> getCombos(String name, Integer status, Integer page, Integer pageSize) {
         PageRequest pageRequest;
         if (page == null || pageSize == null) {
             pageRequest = PageRequest.of(0, Integer.MAX_VALUE);
         } else {
             pageRequest = PageRequest.of(page - 1, pageSize);
         }
-        Page<Combo> bookings = comboRepositoryImpl.getCombos(name, pageRequest);
+        Page<Combo> bookings = comboRepositoryImpl.getCombos(name, status, pageRequest);
         return setPageDto(bookings);
     }
 

@@ -51,7 +51,7 @@ public class BookingController {
     }
 
     @ApiOperation(value = "Cập nhật trạng thái các yêu cầu đặt lịch")
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @PutMapping("/update-booking-status-list")
     public ResponseEntity<?> updateBookingStatusList(@RequestBody UpdateStatusListRequest updateStatusListRequest) {
         bookingService.updateBookingStatusList(updateStatusListRequest.getIds(), updateStatusListRequest.getStatus());
@@ -59,7 +59,7 @@ public class BookingController {
     }
 
     @ApiOperation(value = "Hoàn thành lịch đặt")
-    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @PutMapping("/complete-booking/{id}")
     public ResponseEntity<?> completeBooking(@PathVariable("id") Long id,@RequestBody CompleteBookingReq completeBookingReq) {
         bookingService.completeBooking(id, completeBookingReq.getPhoto());

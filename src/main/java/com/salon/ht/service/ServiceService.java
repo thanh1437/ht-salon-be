@@ -71,14 +71,14 @@ public class ServiceService {
         }
     }
 
-    public PageDto<ServiceResponse> getServices(String name, String code, Integer page, Integer pageSize) {
+    public PageDto<ServiceResponse> getServices(String name, String code, Integer status, Integer page, Integer pageSize) {
         PageRequest pageRequest;
         if (page == null || pageSize == null) {
             pageRequest = PageRequest.of(0, Integer.MAX_VALUE);
         } else {
             pageRequest = PageRequest.of(page - 1, pageSize);
         }
-        Page<Service> services = serviceRepositoryImpl.getServices(name, code, pageRequest);
+        Page<Service> services = serviceRepositoryImpl.getServices(name, code, status, pageRequest);
         List<ServiceResponse> serviceResponses = serviceResMapper.toDto(services.getContent());
 
         Comparator<ServiceResponse> comparator = Comparator

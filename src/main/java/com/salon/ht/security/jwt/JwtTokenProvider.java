@@ -8,7 +8,6 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.salon.ht.exception.InvalidTokenRequestException;
 import com.salon.ht.config.RSAKeyProperties;
 import com.salon.ht.constant.RedisKey;
-import com.salon.ht.entity.UserDepartment;
 import com.salon.ht.security.service.UserDetailsImpl;
 import com.salon.ht.util.AppUtils;
 import com.salon.ht.util.RedisUtils;

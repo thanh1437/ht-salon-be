@@ -46,10 +46,11 @@ public class ServiceController {
     public ResponseEntity<?> getServices(
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "code", required = false) String code,
+            @RequestParam(value = "status", required = false) Integer status,
             @RequestParam(value = "page", required = false) Integer page,
             @RequestParam(value = "pageSize", required = false) Integer pageSize
     ) {
-        return ResponseEntity.ok(serviceService.getServices(name, code, page, pageSize));
+        return ResponseEntity.ok(serviceService.getServices(name, code, status, page, pageSize));
     }
 
 }

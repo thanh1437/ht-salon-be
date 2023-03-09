@@ -14,12 +14,17 @@ import java.util.Map;
 @Repository
 public class ComboRepositoryImpl extends EntityRepository implements ComboRepositoryBasic {
     @Override
-    public Page<Combo> getCombos(String name, PageRequest pageRequest) {
+    public Page<Combo> getCombos(String name, Integer status, PageRequest pageRequest) {
         String sqlWhere = "";
         Map<String, Object> params = new HashMap<>();
         if (name != null) {
             sqlWhere += " AND b.name LIKE :name OR b.code = :name";
             params.put("name", "%" + name + "%");
+        }
+
+        if (status != null) {
+            sqlWhere += " AND b.status = :status";
+            params.put("status", status);
         }
 
         String sqlQuery = "SELECT * FROM combo b WHERE 1=1 " + sqlWhere;

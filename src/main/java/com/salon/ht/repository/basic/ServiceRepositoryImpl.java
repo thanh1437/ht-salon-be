@@ -41,7 +41,7 @@ public class ServiceRepositoryImpl extends EntityRepository implements ServiceRe
 
 
     @Override
-    public Page<Service> getServices(String name, String code, PageRequest pageRequest) {
+    public Page<Service> getServices(String name, String code, Integer status, PageRequest pageRequest) {
         String sqlWhere = "";
         Map<String, Object> params = new HashMap<>();
         if (name != null) {
@@ -52,6 +52,11 @@ public class ServiceRepositoryImpl extends EntityRepository implements ServiceRe
         if (code != null) {
             sqlWhere += " AND b.code = :code";
             params.put("code", code);
+        }
+
+        if (status != null) {
+            sqlWhere += " AND b.status = :status";
+            params.put("status", status);
         }
 
         String sqlQuery = "SELECT * FROM service b WHERE 1=1 " + sqlWhere;

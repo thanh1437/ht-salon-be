@@ -58,7 +58,6 @@ public class BookingService extends AbstractService<Booking, Long> {
     private final BookingResMapper bookingResMapper;
     private final BookingRepositoryImpl bookingRepositoryImpl;
     private final ServiceRepositoryImpl serviceRepositoryImpl;
-    private final EmailService emailService;
     private final UserRepository userRepository;
     private final RoleService roleService;
     private final ComboRepository comboRepository;
@@ -67,7 +66,7 @@ public class BookingService extends AbstractService<Booking, Long> {
 
     public BookingService(BookingRepository bookingRepository, ServiceRepository serviceRepository, ServiceMapRepository serviceMapRepository,
                           ServiceMapper serviceMapper, BookingResMapper bookingResMapper, BookingRepositoryImpl bookingRepositoryImpl,
-                          ServiceRepositoryImpl serviceRepositoryImpl, EmailService emailService, UserRepository userRepository,
+                          ServiceRepositoryImpl serviceRepositoryImpl, UserRepository userRepository,
                           RoleService roleService, ComboRepository comboRepository, ComboMapper comboMapper, UserService userService) {
         this.bookingRepository = bookingRepository;
         this.serviceRepository = serviceRepository;
@@ -76,7 +75,6 @@ public class BookingService extends AbstractService<Booking, Long> {
         this.bookingResMapper = bookingResMapper;
         this.bookingRepositoryImpl = bookingRepositoryImpl;
         this.serviceRepositoryImpl = serviceRepositoryImpl;
-        this.emailService = emailService;
         this.userRepository = userRepository;
         this.roleService = roleService;
         this.comboRepository = comboRepository;
@@ -210,21 +208,6 @@ public class BookingService extends AbstractService<Booking, Long> {
         if (status == 3) {
             serviceMapRepository.updateStatusByPkIds(bookingIds, Constant.SERVICE_MAP.BOOKING.name(), 0);
         }
-        //send email
-//        List<EmailResp> emailResps = bookingRepositoryImpl.getEmailRespByBookingIds(bookingIds);
-//        emailResps.forEach(resp -> {
-//            if (!StringUtils.isEmpty(resp.getEmail())) {
-//                try {
-//                    emailService.sendEmail(resp.getEmail(), Constant.SUBJECT_EMAIL, String.format(status == 3 ?
-//                                    Constant.CONTENT_EMAIL_REJECT : CONTENT_EMAIL_APPROVE, resp.getUserName(),
-//                            DATE_TIME_FORMATTER.format(resp.getStartTime()), DATE_TIME_FORMATTER.format(resp.getEndTime())));
-//                } catch (Exception e) {
-//                    throw new BadRequestException("Có lỗi xảy ra!");
-//                }
-//            }
-//
-//        });
-
     }
 
     public void completeBooking(Long id, String photo) {

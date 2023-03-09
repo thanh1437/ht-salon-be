@@ -8,10 +8,7 @@ import com.salon.ht.dto.RoleDto;
 import com.salon.ht.dto.UserDeptDto;
 import com.salon.ht.dto.UserDto;
 import com.salon.ht.dto.UserRoleDto;
-import com.salon.ht.entity.Booking;
-import com.salon.ht.entity.Department;
 import com.salon.ht.entity.Role;
-import com.salon.ht.entity.UserDepartment;
 import com.salon.ht.entity.UserEntity;
 import com.salon.ht.entity.payload.RegistrationRequest;
 import com.salon.ht.entity.payload.RegistrationUserRequest;
@@ -69,10 +66,6 @@ public class UserService extends AbstractService<UserEntity, Long> {
     @Autowired
     private RoleService roleService;
     @Autowired
-    private DepartmentService departmentService;
-    @Autowired
-    private UserDepartmentService userDepartmentService;
-    @Autowired
     private AuthenticationManager authenticationManager;
     @Autowired
     private UserRepositoryBasicImpl userRepositoryBasicImpl;
@@ -81,7 +74,7 @@ public class UserService extends AbstractService<UserEntity, Long> {
 
     private String[] columns = {"Tên tài khoản", "Họ và tên", "Email", "Điện thoại", "Ảnh", "Phòng ban", "Mật khẩu", "Chức danh", "Chức vụ"};
 
-    private final Pattern EMAIL_PATTERN = Pattern.compile("^(.+)@vnpt.vn");
+    private final Pattern EMAIL_PATTERN = Pattern.compile("^(.+)@gmail.com");
     private final Pattern NAME_PATTERN = Pattern.compile("^[\\p{L} .'-]+$");
     private final Pattern PHONE_PATTERN = Pattern.compile("(84|0[1|2|3|5|7|8|9])+([0-9]{8})\\b");
 
@@ -308,18 +301,6 @@ public class UserService extends AbstractService<UserEntity, Long> {
         return userDto;
     }
 
-    public UserDeptDto convertUserDeptDto(UserDepartment userDepartment) {
-        UserDeptDto userDeptDto = new UserDeptDto();
-        userDeptDto.setId(userDepartment.getId());
-        userDeptDto.setDepartmentId(userDepartment.getDepartment().getId());
-        userDeptDto.setDepartmentName(userDepartment.getDepartment().getName());
-        userDeptDto.setJobTitle(userDepartment.getJobTile());
-        userDeptDto.setPosition(userDepartment.getPosition());
-        userDeptDto.setAdmin(userDepartment.getIsAdmin());
-        userDeptDto.setRoot(userDepartment.getIsRoot());
-        return userDeptDto;
-    }
-
     public void changePassword(UserDetailsImpl currentUser, String oldPassword, String newPassword, String confirmNewPassword) {
         if (!confirmNewPassword.equals(newPassword)) {
             throw new BadRequestException("Xác nhận mật khẩu mới không khớp. Vui lòng thử lại!");
@@ -354,80 +335,6 @@ public class UserService extends AbstractService<UserEntity, Long> {
         UserEntity user = userEntity.get();
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
-    }
-
-    public String importUserByCSV(MultipartFile file) {
-        if (!excelService.hasExcelFormat(file)) {
-            throw new ImportUserException("Tệp tải lên phải có định dạng Excel!");
-        }
-
-        try {
-            List<UserCSV> usersCSVs = excelService.readData(file.getInputStream(), Arrays.asList(columns), "DATA");
-            return this.saveDataImport(usersCSVs);
-        } catch (Exception e) {
-            LOGGER.error("Lỗi nhập dữ liệu từ tệp CSV do " + e.getMessage());
-            throw new UploadFileException("Lỗi đọc dữ liệu từ tệp CSV do " + e.getMessage());
-        }
-    }
-
-    private String saveDataImport(List<UserCSV> userCSVs) {
-        AtomicInteger success = new AtomicInteger(0);
-        AtomicInteger fail = new AtomicInteger(0);
-        AtomicInteger duplicate = new AtomicInteger(0);
-        StringBuilder message = new StringBuilder();
-
-        message.append("Import thành công %d, bị trùng %d, bị lỗi %d.\n");
-
-        userCSVs.forEach(userCSV -> {
-            StringBuilder validateError = validateUserCSV(userCSV, fail);
-            if (!validateError.toString().equals("")) {
-                message.append(validateError);
-                return;
-            }
-
-            if (this.existsByEmail(userCSV.getEmail())) {
-                LOGGER.error("Địa chỉ email " + userCSV.getEmail() + " đã tồn tại trong hệ thống.");
-                duplicate.getAndIncrement();
-                message.append("Địa chỉ email ").append(userCSV.getEmail()).append(" đã tồn tại trong hệ thống.\n");
-                return;
-            }
-
-            if (this.existsByUsername(userCSV.getUsername())) {
-                LOGGER.error("Tên tài khoản " + userCSV.getUsername() + " đã tồn tại trong hệ thống.");
-                message.append("Tên tài khoản ").append(userCSV.getUsername()).append(" đã tồn tại trong hệ thống.\n");
-                duplicate.getAndIncrement();
-                return;
-            }
-
-            UserEntity user = new UserEntity();
-            user.setUsername(userCSV.getUsername());
-            user.setName(userCSV.getName());
-            user.setMobile(userCSV.getMobile());
-            user.setEmail(userCSV.getEmail());
-            Role role = roleService.findAll().stream().filter(r -> Objects.equals(r.getName(), RoleName.ROLE_USER.name())).collect(Collectors.toList()).get(0);
-            Set<Role> roles = new HashSet<>();
-            roles.add(role);
-            user.setRoles(roles);
-            user.setPhoto(userCSV.getPhoto());
-            user.setPassword(passwordEncoder.encode(userCSV.getPassword()));
-            user.setStatus(UserStatus.ACTIVE);
-            this.save(user);
-            Set<UserDepartment> userDepartments = new HashSet<>();
-            UserDepartment userDepartment = new UserDepartment();
-            userDepartment.setUser(user);
-            Department department = departmentService.findByPath(userCSV.getDepartmentPath());
-            userDepartment.setDepartment(department);
-            userDepartment.setJobTile(userCSV.getJobTile());
-            userDepartment.setPosition(userCSV.getPosition());
-            userDepartment.setIsRoot(true);
-            userDepartment.setIsAdmin(true);
-            userDepartments.add(userDepartment);
-
-            // save user department
-            userDepartments.forEach(userDepartmentService::save);
-            success.getAndIncrement();
-        });
-        return String.format(message.toString(), success.get(), duplicate.get(), fail.get());
     }
 
     private StringBuilder validateUserCSV(UserCSV userCSV, AtomicInteger fail) {

@@ -16,7 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.Map;
@@ -132,14 +131,6 @@ public class UserController {
         LOGGER.info("update user request {}", request);
         userService.updateUser(request);
         return ResponseEntity.ok(new ApiResponse(true, "Cập nhật thông tin nhân viên thành công!"));
-    }
-
-    @PostMapping("/import_csv")
-    @ApiOperation(value = "API để import dữ liệu người dùng")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> importUserByCSV(@RequestPart(value = "file") MultipartFile file) {
-        String message = userService.importUserByCSV(file);
-        return ResponseEntity.ok(new ApiResponse(true, message));
     }
 
     @GetMapping("/get-users-role-employee")

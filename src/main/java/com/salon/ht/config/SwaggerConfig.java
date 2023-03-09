@@ -27,7 +27,7 @@ public class SwaggerConfig {
                 .securityContexts(List.of(securityContext()))
                 .securitySchemes(List.of(apiKey()))
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.vnpt.meeting.booking"))
+                .apis(RequestHandlerSelectors.basePackage("com.salon.ht"))
                 .paths(PathSelectors.regex("/api.*"))
                 .build()
                 .apiInfo(metaInfo());
